@@ -157,7 +157,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF1A1A1A),
         fontFamily: 'Arial',
       ),
-      home: const PostJobPage(),
+      home: const LoginScreen(),
     );
   }
 }
