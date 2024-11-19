@@ -128,6 +128,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ui/HomeScreen.dart';
 import 'ui/LoginScreen.dart';
+import 'ui/PostJob.dart';
+import 'ui/payment.dart';
 
 
 void main() {
@@ -155,7 +157,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF1A1A1A),
         fontFamily: 'Arial',
       ),
-      home: const LoginScreen(),
+      home: const PostJobPage(),
     );
   }
 }
