@@ -1,0 +1,1 @@
+ D:\\flutter\\Work2024\\GigHire\\.dart_tool\\flutter_build\\058ce1ce738a325a371ae63a7d741386\\native_assets.yaml: 
