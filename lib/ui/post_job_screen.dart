@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class PostJobPage extends StatelessWidget {
-  const PostJobPage({Key? key}) : super(key: key);
+class PostJobScreen extends StatelessWidget {
+  const PostJobScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(

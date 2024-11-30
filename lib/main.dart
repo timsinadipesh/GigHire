@@ -126,10 +126,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'ui/HomeScreen.dart';
-import 'ui/LoginScreen.dart';
-import 'ui/PostJob.dart';
-import 'ui/payment.dart';
+import 'ui/home_screen.dart';
+import 'ui/login_screen.dart';
+import 'ui/post_job_screen.dart';
 
 
 void main() {

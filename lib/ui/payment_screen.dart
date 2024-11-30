@@ -233,16 +233,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     onPressed: _isProcessing ? null : _onPayNowPressed,
                     child: _isProcessing
                         ? const CircularProgressIndicator(
-                      color: Colors.black,
-                    )
+                            color: Colors.black,
+                          )
                         : const Text(
-                      'Pay Now',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                            'Pay Now',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
