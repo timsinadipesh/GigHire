@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gighire/Auth/Login_and_Register.dart';
+import 'package:gighire/Chat%20UI/home_page.dart';
 import 'package:gighire/ui/HomeScreen.dart';
 
 class AuthGate extends StatelessWidget {
@@ -14,7 +15,7 @@ class AuthGate extends StatelessWidget {
         builder: (context, snapshot) {
           //User is logged in
           if (snapshot.hasData) {
-            return const HomeScreen();
+            return const HomePage();
           }
 
           //User is Not logged in

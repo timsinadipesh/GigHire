@@ -18,8 +18,12 @@ class AuthService {
   }
 
   //Sign up
+  
 
   //Sign out
+  Future<void> SignOut() async {
+    return await _auth.signOut();
+  }
 
   //errors
 }
