@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gighire/Auth/auth_service.dart';
+import 'package:gighire/Chat%20UI/chat_page.dart';
 import 'package:gighire/Chat%20UI/settings_page.dart';
 
 class MyDrawer extends StatelessWidget {
@@ -50,7 +51,15 @@ class MyDrawer extends StatelessWidget {
                 child: ListTile(
                   title: Text("C H A T"),
                   leading: Icon(Icons.chat),
-                  onTap: () {},
+                  onTap: () {
+                    //Pop the drawer
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatPage(),
+                        ));
+                  },
                 ),
               ),
 
