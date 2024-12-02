@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gighire/Auth/auth_service.dart';
-import 'package:gighire/Chat%20UI/chat_page.dart';
+import 'package:gighire/Chat%20UI/chat.dart';
+import 'package:gighire/Services/Auth/auth_service.dart';
 import 'package:gighire/Chat%20UI/settings_page.dart';
 
 class MyDrawer extends StatelessWidget {
@@ -8,8 +8,8 @@ class MyDrawer extends StatelessWidget {
 
   void logout() {
     //get auth service
-    final _auth = AuthService();
-    _auth.SignOut();
+    final auth = AuthService();
+    auth.SignOut();
   }
 
   @override
@@ -36,8 +36,8 @@ class MyDrawer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  title: Text("H O M E"),
-                  leading: Icon(Icons.home),
+                  title: const Text("H O M E"),
+                  leading: const Icon(Icons.home),
                   onTap: () {
                     //Pop the drawer
                     Navigator.pop(context);
@@ -49,15 +49,15 @@ class MyDrawer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  title: Text("C H A T"),
-                  leading: Icon(Icons.chat),
+                  title: const Text("C H A T"),
+                  leading: const Icon(Icons.chat),
                   onTap: () {
                     //Pop the drawer
                     Navigator.pop(context);
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ChatPage(),
+                          builder: (context) => Chat(),
                         ));
                   },
                 ),
@@ -67,8 +67,8 @@ class MyDrawer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  title: Text("S E T T I N G S"),
-                  leading: Icon(Icons.settings),
+                  title: const Text("S E T T I N G S"),
+                  leading: const Icon(Icons.settings),
                   onTap: () {
                     //Pop the drawer
                     Navigator.pop(context);
@@ -87,8 +87,8 @@ class MyDrawer extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: ListTile(
-              title: Text("L O G O U T"),
-              leading: Icon(Icons.logout),
+              title: const Text("L O G O U T"),
+              leading: const Icon(Icons.logout),
               onTap: logout,
             ),
           ),

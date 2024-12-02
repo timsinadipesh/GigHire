@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gighire/Auth/auth_service.dart';
+import 'package:gighire/Services/Auth/auth_service.dart';
 import 'package:gighire/Components/Button.dart';
 import 'package:gighire/Components/Textfield.dart';
 
