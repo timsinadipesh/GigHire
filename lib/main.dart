@@ -39,6 +39,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:gighire/Auth/Login_and_Register.dart';
 import 'package:gighire/Auth/auth_gate.dart';
+import 'package:gighire/Chat%20UI/home_page.dart';
 import 'package:gighire/Theme/LigntMode.dart';
 import 'package:gighire/firebase_options.dart';
 
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: const AuthGate(),
+      // home: HomePage(),
       theme: lightmode,
     );
   }
