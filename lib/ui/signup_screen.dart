@@ -102,7 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 // Role Selection
                 const SizedBox(height: 30),
                 const Text(
-                  'I want to',
+                  'I',
                   style: TextStyle(color: Color(0xFF888888), fontSize: 16),
                 ),
                 const SizedBox(height: 20),

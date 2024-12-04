@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "554380338890",
+    "project_id": "gighire-32b51",
+    "storage_bucket": "gighire-32b51.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554380338890:android:d784c6a173f8383ae6b633",
+        "android_client_info": {
+          "package_name": "com.example.gighire"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU9ZEtkw5LhwsLna_CSEeQvQGvktV_E4g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
