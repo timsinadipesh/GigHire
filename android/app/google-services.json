@@ -1,26 +1,43 @@
 {
   "project_info": {
-    "project_number": "554380338890",
-    "project_id": "gighire-32b51",
-    "storage_bucket": "gighire-32b51.firebasestorage.app"
+    "project_number": "311805614389",
+    "project_id": "gighirefirebaseauth",
+    "storage_bucket": "gighirefirebaseauth.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:554380338890:android:d784c6a173f8383ae6b633",
+        "mobilesdk_app_id": "1:311805614389:android:260fb5993e239972d3947c",
         "android_client_info": {
           "package_name": "com.example.gighire"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "311805614389-l6qqme44av9hp90bi45q2abcmiqj39cj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAU9ZEtkw5LhwsLna_CSEeQvQGvktV_E4g"
+          "current_key": "AIzaSyByRu3Yi6B66sMaEoY8b_8fVHEy8c9eCyY"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "311805614389-l6qqme44av9hp90bi45q2abcmiqj39cj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "311805614389-oej5rvq8qra9k9bl3fe3shop965rmvdv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gighire"
+              }
+            }
+          ]
         }
       }
     }

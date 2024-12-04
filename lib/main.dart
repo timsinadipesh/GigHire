@@ -1,10 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gighire/ui/worker_profile_screen.dart';
 import 'ui/login_screen.dart';
 import 'payment/payment_service.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+      apiKey: "AIzaSyA-hU5_Zy-O4rG-ZFyLZpzpojO4nkq7T1Y",
+      authDomain: "gighirefirebaseauth.firebaseapp.com",
+      projectId: "gighirefirebaseauth",
+      storageBucket: "gighirefirebaseauth.firebasestorage.app",
+      messagingSenderId: "311805614389",
+      appId: "1:311805614389:web:6582683930bb9411d3947c",
+      measurementId: "G-QYR9CPLV34",
+    ), // firebase initialization for android and not web, just remove the insides()
+  ); // Ensure Firebase is initialized
   runApp(const MyApp());
 }
 
@@ -29,7 +42,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF1A1A1A),
         fontFamily: 'Arial',
       ),
-      home: const WorkerDetailScreen(),
+      home: const WorkerDetailScreen(workerId: "Users"),
     );
   }
 }

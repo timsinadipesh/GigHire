@@ -1,171 +1,85 @@
-// import 'package:flutter/material.dart';
-//
-// class WorkerDetailScreen extends StatefulWidget {
-//   const WorkerDetailScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   State<WorkerDetailScreen> createState() => _WorkerDetailScreen();
-// }
-//
-// class _WorkerDetailScreen extends State<WorkerDetailScreen> {
-//   Map<String, dynamic> userData = {
-//     'name': 'John Doe',
-//     'title': 'Electrician',
-//     'rating': 4.5,
-//     'location': '[27.34° N, 110.12° W]',
-//     'skills': ['HVAC', 'Electronics', 'Household'],
-//     'email': 'john.doe@gmail.com',
-//     'phone': '+92386429374',
-//     'about': 'If u need me, i\'m here',
-//   };
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('User Details'),
-//       ),
-//       body: Padding(
-//         padding: EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(
-//               userData['name']!,
-//               style: TextStyle(
-//                 fontSize: 24.0,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
-//             SizedBox(height: 8.0),
-//             Text(
-//               userData['title']!,
-//               style: TextStyle(
-//                 fontSize: 18.0,
-//                 color: Colors.grey,
-//               ),
-//             ),
-//             SizedBox(height: 16.0),
-//             Text(
-//               'Rating: ${userData['rating']!.toStringAsFixed(1)}',
-//               style: TextStyle(
-//                 fontSize: 16.0,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
-//             SizedBox(height: 8.0),
-//             Text(
-//               'Location: ${userData['location']!}',
-//               style: TextStyle(
-//                 fontSize: 16.0,
-//               ),
-//             ),
-//             SizedBox(height: 16.0),
-//             Text(
-//               'Skills:',
-//               style: TextStyle(
-//                 fontSize: 16.0,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
-//             SizedBox(height: 8.0),
-//             Wrap(
-//               spacing: 8.0,
-//               children: [
-//                 for (final skill in userData['skills']!)
-//                   Chip(
-//                     label: Text(skill),
-//                     backgroundColor: Colors.grey[200],
-//                   ),
-//               ],
-//             ),
-//             SizedBox(height: 16.0),
-//             Text(
-//               'Contact:',
-//               style: TextStyle(
-//                 fontSize: 16.0,
-//                 fontWeight: FontWeight.bold,
-//               ),
-//             ),
-//             SizedBox(height: 8.0),
-//             Text(
-//               'Email: ${userData['email']!}',
-//               style: TextStyle(
-//                 fontSize: 16.0,
-//               ),
-//             ),
-//             SizedBox(height: 8.0),
-//             Text(
-//               'Phone: ${userData['phone']!}',
-//               style: TextStyle(
-//                 fontSize: 16.0,
-//               ),
-//             ),
-//             SizedBox(height: 16.0),
-//             Text(
-//               'About: "${userData['about']!}"',
-//               style: TextStyle(
-//                 fontSize: 16.0,
-//               ),
-//             ),
-//             SizedBox(height: 16.0),
-//             Align(
-//               alignment: Alignment.centerRight,
-//               child: ElevatedButton(
-//                 onPressed: () {
-//                   // Handle "Hire Now" button press
-//                 },
-//                 child: Text('Hire Now'),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WorkerDetailScreen extends StatefulWidget {
-  const WorkerDetailScreen({Key? key}) : super(key: key);
+  final String workerId;
+
+  const WorkerDetailScreen({Key? key, required this.workerId}) : super(key: key);
 
   @override
   State<WorkerDetailScreen> createState() => _WorkerDetailScreenState();
 }
 
 class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
-  // Updated user data to match the SVG prototype
-  Map<String, dynamic> userData = {
-    'name': 'Michael Chen',
-    'title': 'Full Stack Developer',
-    'rating': 4.9,
-    'jobs': 127,
-    'success_rate': 98,
-    'about': 'Full stack developer with 5+ years of experience. '
-        'Specialized in React, Node.js, and Python. '
-        'Available for both short-term and long-term projects.',
-    'skills': ['React', 'Node.js', 'Python'],
-  };
+  Map<String, dynamic> userData = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      // Fetch user data from Firestore
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('Users') // Replace with your actual collection name
+          .doc(widget.workerId)
+          .get();
+
+      if (docSnapshot.exists) {
+        setState(() {
+          userData = docSnapshot.data() ?? {};
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Worker not found')),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching worker data: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Color(0xFF1a1a1a),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (userData.isEmpty) {
+      return Scaffold(
+        backgroundColor: Color(0xFF1a1a1a),
+        body: Center(
+          child: Text(
+            'No user data available',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Color(0xFF1a1a1a),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(top: 16.0), // Add spacing at the top
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status bar simulation (typically handled by system)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                ),
-              ),
-
               // Profile Header
               Center(
                 child: Column(
@@ -176,7 +90,7 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      userData['name'],
+                      userData['name'] ?? 'Unknown',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -184,7 +98,7 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                       ),
                     ),
                     Text(
-                      userData['title'],
+                      userData['title'] ?? 'No Title',
                       style: TextStyle(
                         color: Color(0xFF888888),
                         fontSize: 16,
@@ -194,55 +108,55 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                 ),
               ),
 
-              // Stats Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildStatCard(
-                      value: '${userData['rating']}',
-                      label: 'Rating',
+                    // Rating Box
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2a2a2a),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Rating:  ${(userData['rating'] ?? 0.0).toStringAsFixed(1)}/5',
+                              style: TextStyle(
+                                fontSize: 14.0, // Reduced font size
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    _buildStatCard(
-                      value: '${userData['jobs']}',
-                      label: 'Jobs',
-                    ),
-                    _buildStatCard(
-                      value: '${userData['success_rate']}%',
-                      label: 'Success',
-                    ),
-                  ],
-                ),
-              ),
+                    SizedBox(width: 8.0), // Space between the two boxes
 
-              // About Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'About',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF2a2a2a),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        userData['about'],
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                    // Job Count Box
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2a2a2a),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Job count:  ${userData['job_count'] ?? 0}',
+                              style: TextStyle(
+                                fontSize: 14.0, // Reduced font size
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -250,42 +164,46 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                 ),
               ),
 
-              // Skills Section
+
+
+              // About Section
+              _buildSectionHeader('About'),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Skills',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Color(0xFF2a2a2a),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    userData['about'] ?? 'No description',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+              ),
+
+              // Skills Section
+              _buildSectionHeader('Skills'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: (userData['skills'] as List? ?? [])
+                      .map((skill) => Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Color(0xFF2a2a2a),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: userData['skills'].map<Widget>((skill) =>
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF2a2a2a),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Text(
-                              skill,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                          )
-                      ).toList(),
+                    child: Text(
+                      skill,
+                      style: TextStyle(color: Colors.white, fontSize: 14),
                     ),
-                  ],
+                  ))
+                      .toList(),
                 ),
               ),
 
@@ -309,10 +227,7 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                         ),
                         child: Text(
                           'Hire Now',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
                       ),
                     ),
@@ -331,10 +246,7 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                         ),
                         child: Text(
                           'Message',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
                       ),
                     ),
@@ -348,7 +260,20 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
     );
   }
 
-  // Helper method to create stat cards
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   Widget _buildStatCard({required String value, required String label}) {
     return Container(
       width: 100,
@@ -362,17 +287,11 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
         children: [
           Text(
             value,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           Text(
             label,
-            style: TextStyle(
-              color: Color(0xFF888888),
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Color(0xFF888888), fontSize: 12),
           ),
         ],
       ),
