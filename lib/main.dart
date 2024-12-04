@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gighire/ui/worker_profile_screen.dart';
 import 'ui/login_screen.dart';
 import 'payment/payment_service.dart';
 
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF1A1A1A),
         fontFamily: 'Arial',
       ),
-      home: const PaymentScreen(),
+      home: const WorkerDetailScreen(),
     );
   }
 }
