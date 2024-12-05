@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gighire/ui/signup_screen.dart';
-import 'package:gighire/ui/worker_profile_screen.dart';
+import 'package:gighire/worker/worker_profile_screen.dart';
 import 'ui/login_screen.dart';
 import 'payment/payment_service.dart';
 

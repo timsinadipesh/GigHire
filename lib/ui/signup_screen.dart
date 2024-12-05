@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-import '../client/client_signup.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../worker/worker_signup.dart';
 
 enum UserRole { serviceProvider, serviceSeeker }
@@ -14,6 +16,20 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   UserRole? selectedRole;
+  dynamic _image; // Placeholder for the image state
+  final ImagePicker _picker = ImagePicker();
+  File? _profileImage;
+
+  Future<void> _pickImage(bool isProfile) async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        if (isProfile) {
+          _profileImage = File(pickedFile.path);
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +43,12 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // Logo and Tagline
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
                 const Text(
                   'GigHire',
                   style: TextStyle(
                     color: Color(0xFF4CAF50),
-                    fontSize: 36, // Reduced size
+                    fontSize: 26, // Reduced size
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -43,7 +59,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
 
                 // Input Fields
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Full Name',
@@ -115,9 +131,32 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   style: const TextStyle(color: Colors.white),
                 ),
+                const SizedBox(height: 20),
+
+                GestureDetector(
+                  onTap: () => _pickImage(true),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: _profileImage == null ? const Color(0xFF2A2A2A) : const Color(0xFF4CAF50),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: _profileImage == null
+                        ? const Text(
+                      'Upload Profile Photo',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
+                    )
+                        : const Text(
+                      'Profile Photo Uploaded',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
                 // Role Selection
-                const SizedBox(height: 30),
                 Row(
                   children: [
                     const Text(
@@ -182,7 +221,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
 
                 // Sign Up Button
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -194,13 +233,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           MaterialPageRoute(builder: (context) => const WorkerSignupScreen()),
                         );
                       } else if (selectedRole == UserRole.serviceSeeker) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ClientSignupScreen()),
-                        );
+                        // todo: db data entry
                       }
                     },
-
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       shape: RoundedRectangleBorder(

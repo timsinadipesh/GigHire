@@ -11,7 +11,6 @@ class WorkerSignupScreen extends StatefulWidget {
 
 class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
   final ImagePicker _picker = ImagePicker();
-  File? _profileImage;
   List<File?> _certificationImages = [];
   List<TextEditingController> skillControllers = [];
 
@@ -23,9 +22,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        if (isProfile) {
-          _profileImage = File(pickedFile.path);
-        } else if (_certificationImages.length < maxCertifications) {
+        if (_certificationImages.length < maxCertifications) {
           _certificationImages.add(File(pickedFile.path));
         }
       });
@@ -123,30 +120,6 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
-
-                // Upload Profile Photo
-                GestureDetector(
-                  onTap: () => _pickImage(true),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: _profileImage == null ? const Color(0xFF2A2A2A) : const Color(0xFF4CAF50),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: _profileImage == null
-                        ? const Text(
-                      'Upload Profile Photo',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    )
-                        : const Text(
-                      'Profile Photo Uploaded',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
 
                 // Upload Certifications (with dynamic text updates)
                 Column(
