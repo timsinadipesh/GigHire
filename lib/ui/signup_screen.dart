@@ -24,23 +24,23 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // Logo and Tagline
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 const Text(
                   'GigHire',
                   style: TextStyle(
                     color: Color(0xFF4CAF50),
-                    fontSize: 40,
+                    fontSize: 36, // Reduced size
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5), // Reduced spacing
                 const Text(
                   'Create your account',
                   style: TextStyle(color: Color(0xFF888888), fontSize: 16),
                 ),
 
                 // Input Fields
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Full Name',
@@ -85,6 +85,20 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Address',
+                    hintStyle: const TextStyle(color: Color(0xFF666666)),
+                    filled: true,
+                    fillColor: const Color(0xFF2A2A2A),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+                TextField(
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: 'Password',
@@ -101,70 +115,62 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 // Role Selection
                 const SizedBox(height: 30),
-                const Text(
-                  'I',
-                  style: TextStyle(color: Color(0xFF888888), fontSize: 16),
-                ),
-                const SizedBox(height: 20),
                 Row(
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedRole = UserRole.serviceProvider;
-                          });
-                        },
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
+                    const Text(
+                      'Role:',
+                      style: TextStyle(color: Color(0xFF888888), fontSize: 16),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedRole = UserRole.serviceProvider;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: selectedRole == UserRole.serviceProvider
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFF2A2A2A),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'Service Provider',
+                          style: TextStyle(
                             color: selectedRole == UserRole.serviceProvider
-                                ? const Color(0xFF4CAF50)
-                                : const Color(0xFF2A2A2A),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Provide Services',
-                              style: TextStyle(
-                                color: selectedRole == UserRole.serviceProvider
-                                    ? Colors.white
-                                    : const Color(0xFF888888),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                                ? Colors.white
+                                : const Color(0xFF888888),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedRole = UserRole.serviceSeeker;
-                          });
-                        },
-                        child: Container(
-                          height: 50,
-                          decoration: BoxDecoration(
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedRole = UserRole.serviceSeeker;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: selectedRole == UserRole.serviceSeeker
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFF2A2A2A),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          'Service Seeker',
+                          style: TextStyle(
                             color: selectedRole == UserRole.serviceSeeker
-                                ? const Color(0xFF4CAF50)
-                                : const Color(0xFF2A2A2A),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Seek Services',
-                              style: TextStyle(
-                                color: selectedRole == UserRole.serviceSeeker
-                                    ? Colors.white
-                                    : const Color(0xFF888888),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                                ? Colors.white
+                                : const Color(0xFF888888),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
