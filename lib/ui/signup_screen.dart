@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../client/client_signup.dart';
+import '../worker/worker_signup.dart';
+
 enum UserRole { serviceProvider, serviceSeeker }
 
 class SignupScreen extends StatefulWidget {
@@ -118,7 +121,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   children: [
                     const Text(
-                      'Role:',
+                      'Sign up as:',
                       style: TextStyle(color: Color(0xFF888888), fontSize: 16),
                     ),
                     const Spacer(),
@@ -137,7 +140,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          'Service Provider',
+                          'Worker',
                           style: TextStyle(
                             color: selectedRole == UserRole.serviceProvider
                                 ? Colors.white
@@ -164,7 +167,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          'Service Seeker',
+                          'Client',
                           style: TextStyle(
                             color: selectedRole == UserRole.serviceSeeker
                                 ? Colors.white
@@ -184,7 +187,20 @@ class _SignupScreenState extends State<SignupScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if (selectedRole == UserRole.serviceProvider) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const WorkerSignupScreen()),
+                        );
+                      } else if (selectedRole == UserRole.serviceSeeker) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ClientSignupScreen()),
+                        );
+                      }
+                    },
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       shape: RoundedRectangleBorder(
