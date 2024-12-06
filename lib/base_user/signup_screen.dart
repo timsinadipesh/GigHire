@@ -70,7 +70,7 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // Logo and Tagline
-                const SizedBox(height: 5),
+                const SizedBox(height: 0),
                 const Text(
                   'GigHire',
                   style: TextStyle(
@@ -79,7 +79,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 0),
                 const Text(
                   'Create your account',
                   style: TextStyle(color: Color(0xFF888888), fontSize: 16),
@@ -305,6 +305,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             'email': email,
                             'phoneNumber': phoneNumber,
                             'address': address,
+                            'password': password,
                             'createdAt': FieldValue.serverTimestamp(),
                           };
 
@@ -318,11 +319,6 @@ class _SignupScreenState extends State<SignupScreen> {
                               .collection('clients')
                               .doc(userId)
                               .set(clientData);
-
-                          // Notify success
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Sign-up successful!')),
-                          );
 
                           // Navigate to home screen
                           Navigator.pushReplacementNamed(context, '/home');
@@ -351,7 +347,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
 
                 // Login Link
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

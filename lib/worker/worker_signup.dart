@@ -113,6 +113,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
         'email': widget.email,
         'phoneNumber': widget.phoneNumber,
         'address': widget.address,
+        'password': widget.password,
         'workExperience': _workExperienceController.text,
         'hourlyRate': double.tryParse(_hourlyRateController.text) ?? 0.0,
         'skills': skills,
@@ -130,11 +131,6 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
           .collection('workers')
           .doc(userId)
           .set(workerData);
-
-      // Notify success
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign-up successful!')),
-      );
 
       // Navigate to home screen
       Navigator.pushReplacementNamed(context, '/home');
