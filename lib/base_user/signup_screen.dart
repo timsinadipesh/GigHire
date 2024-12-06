@@ -321,7 +321,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               .set(clientData);
 
                           // Navigate to home screen
-                          Navigator.pushReplacementNamed(context, '/home');
+                          Navigator.pushReplacementNamed(context, '/client_home');
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Error signing up: $e')),
@@ -357,7 +357,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacementNamed(context, '/login');
                       },
                       child: const Text(
                         'Log in',

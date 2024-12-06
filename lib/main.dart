@@ -1,11 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gighire/base_user/home_screen.dart';
 import 'package:gighire/base_user/signup_screen.dart';
-import 'package:gighire/worker/worker_profile_screen.dart';
+import 'package:gighire/client/client_home_screen.dart';
+import 'package:gighire/worker/worker_home_screen.dart';
 import 'base_user/login_screen.dart';
-import 'payment/payment_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,10 +44,12 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF1A1A1A),
         fontFamily: 'Arial',
       ),
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
-        '/': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/client_home': (context) => const ClientHomeScreen(),
+        '/worker_home': (context) => const WorkerHomeScreen(),
       },
     );
   }

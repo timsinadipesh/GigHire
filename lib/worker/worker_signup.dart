@@ -133,7 +133,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
           .set(workerData);
 
       // Navigate to home screen
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/worker_home');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error signing up: $e')),

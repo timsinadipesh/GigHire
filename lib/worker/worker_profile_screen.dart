@@ -24,7 +24,7 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
     try {
       // Fetch user data from Firestore
       final docSnapshot = await FirebaseFirestore.instance
-          .collection('Users') // Replace with your actual collection name
+          .collection('workers')
           .doc(widget.workerId)
           .get();
 
@@ -90,7 +90,7 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      userData['name'] ?? 'Unknown',
+                      userData['fullName'] ?? 'Unknown',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
