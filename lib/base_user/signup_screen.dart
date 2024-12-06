@@ -1,13 +1,11 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gighire/worker/worker_signup.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../services/image_upload_service.dart';
-import 'package:flutter/foundation.dart'; // For `kIsWeb`
+import '../services/img_service.dart';
 
 enum UserRole { serviceProvider, serviceSeeker }
 
@@ -20,9 +18,8 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   UserRole? selectedRole;
-  dynamic _image; // Placeholder for the image state
+  File? _profileImage; // Placeholder for the image state
   final ImagePicker _picker = ImagePicker();
-  File? _profileImage;
 
   // TextControllers for form fields
   final _fullNameController = TextEditingController();
@@ -31,35 +28,24 @@ class _SignupScreenState extends State<SignupScreen> {
   final _addressController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  Uint8List? _webImage; // For storing the image bytes in web
-
   // Create an instance of ImageUploadService
   final ImageUploadService _imageUploadService = ImageUploadService();
   String? _uploadedImageUrl; // To store the uploaded image URL
 
-  Future<void> pickImage(bool bool) async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+  Future<void> pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      if (kIsWeb) {
-        // For Web: Read image as bytes
-        _webImage = await pickedFile.readAsBytes();
-        print("Image picked for web. Bytes length: ${_webImage!.length}");
-      } else {
-        // For Mobile/Desktop: Use File
-        _profileImage = File(pickedFile.path);
-        print("Image picked for mobile/desktop. Path: ${_profileImage!.path}");
+      _profileImage = File(pickedFile.path);
+      print("Image picked. Path: ${_profileImage!.path}");
 
-        if (!_profileImage!.existsSync()) {
-          throw Exception("Image file does not exist at path: ${pickedFile.path}");
-        }
+      if (!_profileImage!.existsSync()) {
+        throw Exception("Image file does not exist at path: ${pickedFile.path}");
       }
 
       // Upload the image and store the URL
       try {
-        _uploadedImageUrl = await _imageUploadService.uploadImageToImgur(
-            kIsWeb ? _webImage : _profileImage
-        );
+        _uploadedImageUrl = await _imageUploadService.uploadImageToImgur(_profileImage);
         setState(() {}); // Trigger rebuild to update UI
       } catch (e) {
         print("Error uploading image: $e");
@@ -84,7 +70,7 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // Logo and Tagline
-                const SizedBox(height: 20),
+                const SizedBox(height: 5),
                 const Text(
                   'GigHire',
                   style: TextStyle(
@@ -180,7 +166,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 20),
 
                 GestureDetector(
-                  onTap: () => pickImage(true),
+                  onTap: pickImage,
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
@@ -273,22 +259,38 @@ class _SignupScreenState extends State<SignupScreen> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () async {
-                      if (selectedRole == UserRole.serviceSeeker) {
-                        // Collect form data
-                        String fullName = _fullNameController.text;
-                        String email = _emailController.text;
-                        String phoneNumber = _phoneController.text;
-                        String address = _addressController.text;
-                        String password = _passwordController.text;
+                      // Collect form data
+                      String fullName = _fullNameController.text;
+                      String email = _emailController.text;
+                      String phoneNumber = _phoneController.text;
+                      String address = _addressController.text;
+                      String password = _passwordController.text;
 
-                        // Validation (you can add more comprehensive checks)
-                        if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Please fill in all required fields.')),
-                          );
-                          return;
-                        }
+                      // Validation (you can add more comprehensive checks)
+                      if (fullName.isEmpty || email.isEmpty || phoneNumber.isEmpty || address.isEmpty || password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Please fill in all required fields.')),
+                        );
+                        return;
+                      }
 
+                      if (selectedRole == UserRole.serviceProvider) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WorkerSignupScreen(
+                                fullName: fullName,
+                                email: email,
+                                phoneNumber: phoneNumber,
+                                address: address,
+                                password: password,
+                                uploadedImageUrl: _uploadedImageUrl
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      else if (selectedRole == UserRole.serviceSeeker) {
                         try {
                           // Sign up user with Firebase Authentication
                           UserCredential userCredential = await FirebaseAuth.instance
@@ -303,13 +305,12 @@ class _SignupScreenState extends State<SignupScreen> {
                             'email': email,
                             'phoneNumber': phoneNumber,
                             'address': address,
-                            'role': 'client',
                             'createdAt': FieldValue.serverTimestamp(),
                           };
 
                           // Add uploaded image URL to client data if available
                           if (_uploadedImageUrl != null) {
-                            clientData['profileImage'] = _uploadedImageUrl as Object;
+                            clientData['profileImage'] = _uploadedImageUrl!;
                           }
 
                           // Save client data to Firestore
@@ -320,7 +321,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                           // Notify success
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Sign-up successful! Logging you in...')),
+                            SnackBar(content: Text('Sign-up successful!')),
                           );
 
                           // Navigate to home screen
@@ -332,7 +333,6 @@ class _SignupScreenState extends State<SignupScreen> {
                         }
                       }
                     },
-
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       shape: RoundedRectangleBorder(
@@ -364,28 +364,17 @@ class _SignupScreenState extends State<SignupScreen> {
                         Navigator.pop(context);
                       },
                       child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Color(0xFF4CAF50),
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        'Log in',
+                        style: TextStyle(color: Color(0xFF4CAF50), fontSize: 14),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 30),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<File?>('_profileImage', _profileImage));
   }
 }

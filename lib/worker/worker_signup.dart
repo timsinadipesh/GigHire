@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
-import 'dart:io'; // For image picking
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../services/img_service.dart';
 
 class WorkerSignupScreen extends StatefulWidget {
-  const WorkerSignupScreen({Key? key}) : super(key: key);
+  final String fullName;
+  final String email;
+  final String phoneNumber;
+  final String address;
+  final String password;
+  final String? uploadedImageUrl;
+
+  const WorkerSignupScreen({
+    Key? key,
+    required this.fullName,
+    required this.email,
+    required this.phoneNumber,
+    required this.address,
+    required this.password,
+    this.uploadedImageUrl
+  }) : super(key: key);
 
   @override
   State<WorkerSignupScreen> createState() => _WorkerSignupScreenState();
@@ -12,33 +31,125 @@ class WorkerSignupScreen extends StatefulWidget {
 class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
   final ImagePicker _picker = ImagePicker();
   List<File?> _certificationImages = [];
-  List<TextEditingController> skillControllers = [];
+  List<TextEditingController> skillControllers = [TextEditingController()];
+
+  // New controllers for work experience and hourly rate
+  final TextEditingController _workExperienceController = TextEditingController();
+  final TextEditingController _hourlyRateController = TextEditingController();
 
   // Max limits
   final int maxSkills = 3;
   final int maxCertifications = 3;
 
-  Future<void> _pickImage(bool isProfile) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        if (_certificationImages.length < maxCertifications) {
-          _certificationImages.add(File(pickedFile.path));
+  final ImageUploadService _imageUploadService = ImageUploadService();
+  List<String?> _certificationImageUrls = [];
+
+  Future<void> _pickImage() async {
+    if (_certificationImages.length < maxCertifications) {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        File certImage = File(pickedFile.path);
+
+        // Validate file exists
+        if (!certImage.existsSync()) {
+          throw Exception("Certification image file does not exist at path: ${pickedFile.path}");
         }
-      });
+
+        // Upload the image and store the URL
+        try {
+          String? uploadedUrl = await _imageUploadService.uploadImageToImgur(certImage);
+
+          if (uploadedUrl != null) {
+            setState(() {
+              _certificationImages.add(certImage);
+              _certificationImageUrls.add(uploadedUrl);
+            });
+          }
+        } catch (e) {
+          print("Error uploading certification image: $e");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to upload certification image: $e')),
+          );
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Maximum number of certifications reached')),
+      );
     }
   }
 
   void _addSkillField() {
-    if (skillControllers.length < maxSkills - 1) {
+    if (skillControllers.length < maxSkills) {
       setState(() {
         skillControllers.add(TextEditingController());
       });
     }
   }
 
+  Future<void> _completeSignUp() async {
+    try {
+      // Sign up user with Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: widget.email, password: widget.password);
+
+      // Get the user's UID
+      String userId = userCredential.user?.uid ?? '';
+
+      // Collect skills
+      List<String> skills = [
+        // Primary skill (first TextField)
+        skillControllers.isNotEmpty ? skillControllers[0].text : '',
+        // Additional skills
+        ...skillControllers.skip(1).map((controller) => controller.text).toList()
+      ].where((skill) => skill.isNotEmpty).toList();
+
+      List<String> certificationUrls = [];
+
+      // Create worker document data
+      final workerData = {
+        'fullName': widget.fullName,
+        'email': widget.email,
+        'phoneNumber': widget.phoneNumber,
+        'address': widget.address,
+        'workExperience': _workExperienceController.text,
+        'hourlyRate': double.tryParse(_hourlyRateController.text) ?? 0.0,
+        'skills': skills,
+        'certifications': _certificationImageUrls.whereType<String>().toList(),
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      // Add uploaded profile image URL to worker data if available
+      if (widget.uploadedImageUrl != null) {
+        workerData['profileImage'] = widget.uploadedImageUrl!;
+      }
+
+      // Save worker data to Firestore
+      await FirebaseFirestore.instance
+          .collection('workers')
+          .doc(userId)
+          .set(workerData);
+
+      // Notify success
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign-up successful!')),
+      );
+
+      // Navigate to home screen
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing up: $e')),
+      );
+    }
+  }
+
   @override
   void dispose() {
+    // Dispose of all controllers
+    _workExperienceController.dispose();
+    _hourlyRateController.dispose();
     for (var controller in skillControllers) {
       controller.dispose();
     }
@@ -50,8 +161,8 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4CAF50), // A friendly green background
-        iconTheme: const IconThemeData(color: Colors.white), // Make sure the back button is white
+        backgroundColor: const Color(0xFF4CAF50),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text('Worker Sign Up', style: TextStyle(color: Colors.white)),
       ),
       body: SafeArea(
@@ -61,6 +172,43 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 30),
+
+                // Work Experience TextField
+                TextField(
+                  controller: _workExperienceController,
+                  decoration: InputDecoration(
+                    hintText: 'Work Experience (years)',
+                    hintStyle: const TextStyle(color: Color(0xFF666666)),
+                    filled: true,
+                    fillColor: const Color(0xFF2A2A2A),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+
+                // Hourly Rate TextField
+                TextField(
+                  controller: _hourlyRateController,
+                  decoration: InputDecoration(
+                    hintText: 'Hourly Rate',
+                    hintStyle: const TextStyle(color: Color(0xFF666666)),
+                    filled: true,
+                    fillColor: const Color(0xFF2A2A2A),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixText: 'Rs. ',
+                    prefixStyle: const TextStyle(color: Colors.white),
+                  ),
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                ),
                 const SizedBox(height: 20),
 
                 // Primary Skill (with + sign to add two more skills)
@@ -68,6 +216,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                   children: [
                     Expanded(
                       child: TextField(
+                        controller: skillControllers[0],
                         decoration: InputDecoration(
                           hintText: 'Primary Skill',
                           hintStyle: const TextStyle(color: Color(0xFF666666)),
@@ -102,7 +251,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                 const SizedBox(height: 20),
 
                 // Optional Additional Skills (maximum 2)
-                for (int i = 0; i < skillControllers.length; i++)
+                for (int i = 1; i < skillControllers.length; i++)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20.0),
                     child: TextField(
@@ -146,7 +295,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20.0),
                         child: GestureDetector(
-                          onTap: () => _pickImage(false),
+                          onTap: () => _pickImage(),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
@@ -172,7 +321,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: _completeSignUp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       shape: RoundedRectangleBorder(

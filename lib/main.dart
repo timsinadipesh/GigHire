@@ -1,10 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gighire/ui/home_screen.dart';
-import 'package:gighire/ui/signup_screen.dart';
+import 'package:gighire/base_user/home_screen.dart';
+import 'package:gighire/base_user/signup_screen.dart';
 import 'package:gighire/worker/worker_profile_screen.dart';
-import 'ui/login_screen.dart';
+import 'base_user/login_screen.dart';
 import 'payment/payment_service.dart';
 
 Future<void> main() async {
