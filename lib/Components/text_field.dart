@@ -28,7 +28,7 @@ class MyTextfield extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderSide:
-                BorderSide(color: Theme.of(context).colorScheme.primary),
+                BorderSide(color: Theme.of(context).colorScheme.secondary),
           ),
           fillColor: Theme.of(context).colorScheme.secondary,
           filled: true,

@@ -40,6 +40,7 @@ import 'package:flutter/material.dart';
 import 'package:gighire/Services/Auth/auth_gate.dart';
 import 'package:gighire/Theme/theme_provider.dart';
 import 'package:gighire/firebase_options.dart';
+import 'package:gighire/ui/SignupScreen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: const AuthGate(),
+      // home: const SignupScreen(),
       // home: HomePage(),
       theme: Provider.of<ThemeProvider>(context).themeData,
     );

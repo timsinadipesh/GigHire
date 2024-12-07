@@ -23,6 +23,7 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                
                 // Logo and Tagline
                 const SizedBox(height: 40),
                 const Text(
