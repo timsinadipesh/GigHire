@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gighire/base_user/globals.dart';
 
-class WorkerDetailScreen extends StatefulWidget {
-  final String workerId;
-
-  const WorkerDetailScreen({Key? key, required this.workerId}) : super(key: key);
+class WorkerProfileScreen extends StatefulWidget {
+  const WorkerProfileScreen({Key? key}) : super(key: key);
 
   @override
-  State<WorkerDetailScreen> createState() => _WorkerDetailScreenState();
+  State<WorkerProfileScreen> createState() => _WorkerProfileScreenState();
 }
 
-class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
+class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   Map<String, dynamic> userData = {};
   bool _isLoading = true;
 
@@ -21,11 +20,24 @@ class _WorkerDetailScreenState extends State<WorkerDetailScreen> {
   }
 
   Future<void> _fetchUserData() async {
+    var userId = globalUserId;
+
+    if (userId == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User ID not found')),
+      );
+      return;
+    }
+
+
     try {
       // Fetch user data from Firestore
       final docSnapshot = await FirebaseFirestore.instance
           .collection('workers')
-          .doc(widget.workerId)
+          .doc(userId)
           .get();
 
       if (docSnapshot.exists) {

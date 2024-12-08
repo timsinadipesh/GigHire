@@ -33,7 +33,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
   List<File?> _certificationImages = [];
   List<TextEditingController> skillControllers = [TextEditingController()];
 
-  // New controllers for work experience and hourly rate
+  final TextEditingController _jobTitleController = TextEditingController();
   final TextEditingController _workExperienceController = TextEditingController();
   final TextEditingController _hourlyRateController = TextEditingController();
 
@@ -89,6 +89,14 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
   }
 
   Future<void> _completeSignUp() async {
+    // Validate job title is not empty
+    if (_jobTitleController.text.trim().isEmpty || _hourlyRateController.text.trim().isEmpty || _workExperienceController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields.')),
+      );
+      return;
+    }
+
     try {
       // Sign up user with Firebase Authentication
       UserCredential userCredential = await FirebaseAuth.instance
@@ -114,6 +122,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
         'phoneNumber': widget.phoneNumber,
         'address': widget.address,
         'password': widget.password,
+        'jobTitle': _jobTitleController.text.trim(),
         'workExperience': _workExperienceController.text,
         'hourlyRate': double.tryParse(_hourlyRateController.text) ?? 0.0,
         'skills': skills,
@@ -144,6 +153,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
   @override
   void dispose() {
     // Dispose of all controllers
+    _jobTitleController.dispose();
     _workExperienceController.dispose();
     _hourlyRateController.dispose();
     for (var controller in skillControllers) {
@@ -169,11 +179,28 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
               children: [
                 const SizedBox(height: 30),
 
+                // New Job Title TextField
+                TextField(
+                  controller: _jobTitleController,
+                  decoration: InputDecoration(
+                    hintText: 'Job Title *',
+                    hintStyle: const TextStyle(color: Color(0xFF666666)),
+                    filled: true,
+                    fillColor: const Color(0xFF2A2A2A),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+
                 // Work Experience TextField
                 TextField(
                   controller: _workExperienceController,
                   decoration: InputDecoration(
-                    hintText: 'Work Experience (years)',
+                    hintText: 'Work Experience (years) *',
                     hintStyle: const TextStyle(color: Color(0xFF666666)),
                     filled: true,
                     fillColor: const Color(0xFF2A2A2A),
@@ -191,7 +218,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                 TextField(
                   controller: _hourlyRateController,
                   decoration: InputDecoration(
-                    hintText: 'Hourly Rate',
+                    hintText: 'Hourly Rate *',
                     hintStyle: const TextStyle(color: Color(0xFF666666)),
                     filled: true,
                     fillColor: const Color(0xFF2A2A2A),

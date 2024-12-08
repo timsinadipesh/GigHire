@@ -90,7 +90,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 TextField(
                   controller: _fullNameController,
                   decoration: InputDecoration(
-                    hintText: 'Full Name',
+                    hintText: 'Full Name *',
                     hintStyle: const TextStyle(color: Color(0xFF666666)),
                     filled: true,
                     fillColor: const Color(0xFF2A2A2A),
@@ -105,7 +105,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 TextField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    hintText: 'Email',
+                    hintText: 'Email *',
                     hintStyle: const TextStyle(color: Color(0xFF666666)),
                     filled: true,
                     fillColor: const Color(0xFF2A2A2A),
@@ -152,7 +152,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
-                    hintText: 'Password',
+                    hintText: 'Password *',
                     hintStyle: const TextStyle(color: Color(0xFF666666)),
                     filled: true,
                     fillColor: const Color(0xFF2A2A2A),
@@ -267,7 +267,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       String password = _passwordController.text;
 
                       // Validation (you can add more comprehensive checks)
-                      if (fullName.isEmpty || email.isEmpty || phoneNumber.isEmpty || address.isEmpty || password.isEmpty) {
+                      if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Please fill in all required fields.')),
                         );

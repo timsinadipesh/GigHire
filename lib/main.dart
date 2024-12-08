@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:gighire/base_user/signup_screen.dart';
 import 'package:gighire/client/client_home_screen.dart';
 import 'package:gighire/worker/worker_home_screen.dart';
+import 'package:gighire/worker/worker_profile_screen.dart';
 import 'base_user/login_screen.dart';
 
 Future<void> main() async {
@@ -50,6 +51,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignupScreen(),
         '/client_home': (context) => const ClientHomeScreen(),
         '/worker_home': (context) => const WorkerHomeScreen(),
+        '/worker_profile': (context) => const WorkerProfileScreen(),
       },
     );
   }

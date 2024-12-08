@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/client/client_home_screen.dart';
 import 'package:gighire/worker/worker_home_screen.dart';
-import 'signup_screen.dart';
+import 'package:gighire/base_user/globals.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -61,13 +61,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Determine user role
         if (clientSnapshot.exists) {
-          // Client login successful
+          globalUserId = firebaseUser.uid;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const ClientHomeScreen()),
           );
         } else if (workerSnapshot.exists) {
-          // Worker login successful
+          globalUserId = firebaseUser.uid;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const WorkerHomeScreen()),
