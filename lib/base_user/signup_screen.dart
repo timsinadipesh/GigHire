@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gighire/worker/worker_signup.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/img_service.dart';
+import 'package:gighire/services/img_service.dart';
+import 'package:gighire/base_user/globals.dart';
 
 enum UserRole { serviceProvider, serviceSeeker }
 
@@ -320,6 +321,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               .doc(userId)
                               .set(clientData);
 
+                          globalUserId = userId;
                           // Navigate to home screen
                           Navigator.pushReplacementNamed(context, '/client_home');
                         } catch (e) {

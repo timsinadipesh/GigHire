@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../services/img_service.dart';
+import 'package:gighire/services/img_service.dart';
 
 class WorkerSignupScreen extends StatefulWidget {
   final String fullName;
@@ -33,6 +32,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
   List<File?> _certificationImages = [];
   List<TextEditingController> skillControllers = [TextEditingController()];
 
+  final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _jobTitleController = TextEditingController();
   final TextEditingController _workExperienceController = TextEditingController();
   final TextEditingController _hourlyRateController = TextEditingController();
@@ -90,7 +90,8 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
 
   Future<void> _completeSignUp() async {
     // Validate job title is not empty
-    if (_jobTitleController.text.trim().isEmpty || _hourlyRateController.text.trim().isEmpty || _workExperienceController.text.trim().isEmpty) {
+    if (_jobTitleController.text.trim().isEmpty || _hourlyRateController.text.trim().isEmpty || //
+    _workExperienceController.text.trim().isEmpty || _aboutController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all required fields.')),
       );
@@ -127,6 +128,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
         'hourlyRate': double.tryParse(_hourlyRateController.text) ?? 0.0,
         'skills': skills,
         'certifications': _certificationImageUrls.whereType<String>().toList(),
+        'about': _aboutController.text.trim(),
         'createdAt': FieldValue.serverTimestamp(),
       };
 
@@ -156,6 +158,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
     _jobTitleController.dispose();
     _workExperienceController.dispose();
     _hourlyRateController.dispose();
+    _aboutController.dispose();
     for (var controller in skillControllers) {
       controller.dispose();
     }
@@ -210,6 +213,24 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                     ),
                   ),
                   keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+
+                // About TextField
+                TextField(
+                  controller: _aboutController,
+                  decoration: InputDecoration(
+                    hintText: 'About *',
+                    hintStyle: const TextStyle(color: Color(0xFF666666)),
+                    filled: true,
+                    fillColor: const Color(0xFF2A2A2A),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  maxLines: 4, // Allows multi-line input
                   style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 20),
@@ -339,7 +360,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                 ),
 
                 // Sign Up Button
-                const SizedBox(height: 30),
+                const SizedBox(height: 5),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -361,6 +382,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

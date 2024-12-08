@@ -110,7 +110,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                       ),
                     ),
                     Text(
-                      userData['title'] ?? 'No Title',
+                      userData['jobTitle'] ?? 'No Title',
                       style: TextStyle(
                         color: Color(0xFF888888),
                         fontSize: 16,
@@ -175,8 +175,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   ],
                 ),
               ),
-
-
 
               // About Section
               _buildSectionHeader('About'),
