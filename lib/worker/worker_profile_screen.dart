@@ -1,9 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
-  final String? userId; // Make userId optional, defaulting to global user ID
+  final String? userId;
 
   const WorkerProfileScreen({Key? key, this.userId}) : super(key: key);
 
@@ -23,10 +24,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   }
 
   Future<void> _fetchUserData() async {
-    // Determine the user ID to fetch
     var userId = widget.userId ?? globalUserId;
-
-    // Check if this is the current user's own profile
     _isOwnProfile = (userId == globalUserId);
 
     if (userId == null) {
@@ -40,7 +38,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     }
 
     try {
-      // Fetch user data from Firestore using the passed or global user ID
       final docSnapshot = await FirebaseFirestore.instance
           .collection('workers')
           .doc(userId)
@@ -67,6 +64,13 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
         SnackBar(content: Text('Error fetching worker data: $e')),
       );
     }
+  }
+
+  // Helper method to format date
+  String _formatDate(Timestamp? timestamp) {
+    if (timestamp == null) return 'N/A';
+    DateTime dateTime = timestamp.toDate();
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
   @override
@@ -98,7 +102,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Header (remains the same)
               Center(
                 child: Column(
                   children: [
@@ -132,7 +135,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 ),
               ),
 
-
+              // rating and job count row
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                 child: Row(
@@ -189,6 +192,86 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 ),
               ),
 
+              // rate and experience row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                child: Row(
+                  children: [
+                    // Rating Box
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2a2a2a),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Hourly Pricing:  ${(userData['hourlyRate']?.toInt() ?? 0)}',
+                              style: TextStyle(
+                                fontSize: 14.0, // Reduced font size
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.0), // Space between the two boxes
+
+                    // Experience box
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        decoration: BoxDecoration(
+                          color: Color(0xFF2a2a2a),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Experience: ${userData['workExperience'] ?? 0} years',
+                              style: TextStyle(
+                                fontSize: 14.0, // Reduced font size
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Contact Information Section
+              _buildSectionHeader('Contact Information'),
+              _buildInfoCard(
+                icon: Icons.email,
+                title: 'Email',
+                value: userData['email'] ?? 'Not provided',
+              ),
+              _buildInfoCard(
+                icon: Icons.phone,
+                title: 'Phone Number',
+                value: userData['phoneNumber'] ?? 'Not provided',
+              ),
+              _buildInfoCard(
+                icon: Icons.location_on,
+                title: 'Address',
+                value: userData['address'] ?? 'Not provided',
+              ),
+              _buildInfoCard(
+                icon: Icons.calendar_today,
+                title: 'Joined',
+                value: _formatDate(userData['createdAt']),
+              ),
+
               // About Section
               _buildSectionHeader('About'),
               Padding(
@@ -227,6 +310,15 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     ),
                   ))
                       .toList(),
+                ),
+              ),
+
+              // Certifications Section
+              _buildSectionHeader('Certifications'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: _buildCertificationGallery(
+                  certifications: (userData['certifications'] as List?) ?? [],
                 ),
               ),
 
@@ -281,6 +373,116 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // New helper method for information cards
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Color(0xFF2a2a2a),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white, size: 24),
+            SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Color(0xFF888888),
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // New helper method for certifications gallery
+  Widget _buildCertificationGallery({required List certifications}) {
+    if (certifications.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Text(
+          'No certifications',
+          style: TextStyle(color: Colors.white),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: certifications.map<Widget>((certUrl) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: GestureDetector(
+              onTap: () {
+                // Optional: Implement full-screen image view
+                _showCertificationDialog(certUrl);
+              },
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Color(0xFF2a2a2a),
+                ),
+                child: CachedNetworkImage(
+                  imageUrl: certUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  // Optional: Method to show certification in full screen
+  void _showCertificationDialog(String certUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: CachedNetworkImage(
+            imageUrl: certUrl,
+            fit: BoxFit.contain,
+            placeholder: (context, url) => Center(
+              child: CircularProgressIndicator(),
+            ),
+            errorWidget: (context, url, error) => Icon(Icons.error),
+          ),
+        );
+      },
     );
   }
 
