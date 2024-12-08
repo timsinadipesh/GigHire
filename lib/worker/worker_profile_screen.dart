@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
-  const WorkerProfileScreen({Key? key}) : super(key: key);
+  final String? userId; // Make userId optional, defaulting to global user ID
+
+  const WorkerProfileScreen({Key? key, this.userId}) : super(key: key);
 
   @override
   State<WorkerProfileScreen> createState() => _WorkerProfileScreenState();
@@ -12,6 +14,7 @@ class WorkerProfileScreen extends StatefulWidget {
 class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   Map<String, dynamic> userData = {};
   bool _isLoading = true;
+  bool _isOwnProfile = false;
 
   @override
   void initState() {
@@ -20,7 +23,11 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   }
 
   Future<void> _fetchUserData() async {
-    var userId = globalUserId;
+    // Determine the user ID to fetch
+    var userId = widget.userId ?? globalUserId;
+
+    // Check if this is the current user's own profile
+    _isOwnProfile = (userId == globalUserId);
 
     if (userId == null) {
       setState(() {
@@ -32,9 +39,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
       return;
     }
 
-
     try {
-      // Fetch user data from Firestore
+      // Fetch user data from Firestore using the passed or global user ID
       final docSnapshot = await FirebaseFirestore.instance
           .collection('workers')
           .doc(userId)
@@ -88,17 +94,23 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
       backgroundColor: Color(0xFF1a1a1a),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 16.0), // Add spacing at the top
+          padding: EdgeInsets.only(top: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Profile Header
+              // Profile Header (remains the same)
               Center(
                 child: Column(
                   children: [
                     CircleAvatar(
                       radius: 50,
+                      backgroundImage: userData['profileImage'] != null
+                          ? NetworkImage(userData['profileImage'])
+                          : null,
                       backgroundColor: Color(0xFF333333),
+                      child: userData['profileImage'] == null
+                          ? Icon(Icons.person, color: Colors.white, size: 50)
+                          : null,
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -119,6 +131,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   ],
                 ),
               ),
+
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
@@ -217,52 +230,53 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 ),
               ),
 
-              // Action Buttons
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Hire Now action
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF4CAF50),
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+              // Modify the Action Buttons section
+              if (!_isOwnProfile)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Hire Now action
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF4CAF50),
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'Hire Now',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
                         ),
-                        child: Text(
-                          'Hire Now',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
                       ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Message action
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF2a2a2a),
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Message action
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF2a2a2a),
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'Message',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
                         ),
-                        child: Text(
-                          'Message',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
