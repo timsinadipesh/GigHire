@@ -382,7 +382,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 40),
               ],
             ),
           ),
