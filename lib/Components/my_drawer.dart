@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gighire/Chat%20UI/chat.dart';
 import 'package:gighire/Chat%20UI/servivces.dart';
+import 'package:gighire/Esewa/esewa_screen.dart';
 import 'package:gighire/Services/Auth/auth_service.dart';
 import 'package:gighire/Chat%20UI/settings_page.dart';
 
@@ -77,6 +78,24 @@ class MyDrawer extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => Servivces(),
+                        ));
+                  },
+                ),
+              ),
+
+              //Esewa
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  title: const Text("Esewa"),
+                  leading: const Icon(Icons.chat),
+                  onTap: () {
+                    //Pop the drawer
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EsewaScreen(),
                         ));
                   },
                 ),

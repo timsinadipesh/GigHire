@@ -39,6 +39,9 @@ dependencies:
   cloud_firestore: ^5.5.0
   provider: ^6.1.2
 
+  esewa_flutter_sdk:
+    path: ./external_sdk/esewa_sdk/esewa_flutter_sdk
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
