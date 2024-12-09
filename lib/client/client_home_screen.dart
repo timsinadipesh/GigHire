@@ -1,7 +1,37 @@
 import 'package:flutter/material.dart';
 
-class ClientHomeScreen extends StatelessWidget {
+class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({Key? key}) : super(key: key);
+
+  @override
+  _ClientHomeScreenState createState() => _ClientHomeScreenState();
+}
+
+class _ClientHomeScreenState extends State<ClientHomeScreen> {
+  // Add a state variable to track the current selected index
+  int _selectedIndex = 0;
+
+  // Method to handle bottom navigation item taps
+  void _onBottomNavItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    // Add navigation logic based on the selected index
+    switch (index) {
+      case 0:
+      // Already on home screen, do nothing
+        break;
+      case 1:
+      // Navigate to search screen
+        Navigator.pushNamed(context, '/search');
+        break;
+      case 2:
+      // Navigate to profile screen
+        Navigator.pushNamed(context, '/client_profile');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +61,45 @@ class ClientHomeScreen extends StatelessWidget {
             _buildBottomNavBar(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavBar() {
+    return Container(
+      height: 60,
+      color: const Color(0xFF2A2A2A),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Pass the selected index to determine active state
+          _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
+          _buildNavBarItem(Icons.search, 'Search', _selectedIndex == 1, 1),
+          _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 2, 2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavBarItem(IconData icon, String label, bool isSelected, int index) {
+    return GestureDetector(
+      onTap: () => _onBottomNavItemTapped(index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? const Color(0xFF4CAF50) : Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -137,6 +206,7 @@ class ClientHomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _buildWorkerCard(
+          context: context,
           name: 'John Smith',
           profession: 'Web Developer',
           rating: '4.9',
@@ -144,6 +214,7 @@ class ClientHomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _buildWorkerCard(
+          context: context,
           name: 'Sarah Johnson',
           profession: 'Graphic Designer',
           rating: '4.8',
@@ -154,105 +225,86 @@ class ClientHomeScreen extends StatelessWidget {
   }
 
   Widget _buildWorkerCard({
+    required BuildContext context,
     required String name,
     required String profession,
     required String rating,
     required String reviews,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: const Color(0xFF333333),
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to worker profile screen
+        Navigator.pushNamed(
+            context,
+            '/client_profile',
+            arguments: {
+              'name': name,
+              'profession': profession,
+              'rating': rating,
+              'reviews': reviews,
+            }
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFF333333),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  profession,
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.star,
-                      color: Color(0xFF4CAF50),
-                      size: 16,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$rating ($reviews reviews)',
-                      style: const TextStyle(
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    profession,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.star,
                         color: Color(0xFF4CAF50),
-                        fontSize: 14,
+                        size: 16,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 4),
+                      Text(
+                        '$rating ($reviews reviews)',
+                        style: const TextStyle(
+                          color: Color(0xFF4CAF50),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return Container(
-      height: 60,
-      color: const Color(0xFF2A2A2A),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavBarItem(Icons.home, 'Home', true),
-          _buildNavBarItem(Icons.search, 'Search', false),
-          _buildNavBarItem(Icons.person, 'Profile', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavBarItem(IconData icon, String label, bool isSelected) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: isSelected ? const Color(0xFF4CAF50) : Colors.grey,
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey,
-            fontSize: 12,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
