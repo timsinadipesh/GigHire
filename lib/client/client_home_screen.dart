@@ -23,8 +23,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       // Already on home screen, do nothing
         break;
       case 1:
-      // Navigate to search screen
-        Navigator.pushNamed(context, '/search');
+      // Navigate to post_job screen
+        Navigator.pushNamed(context, '/post_job');
         break;
       case 2:
       // Navigate to profile screen
@@ -48,7 +48,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSearchBar(),
+                      _buildPostJobBar(),
                       const SizedBox(height: 24),
                       _buildCategoriesSection(),
                       const SizedBox(height: 24),
@@ -74,7 +74,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         children: [
           // Pass the selected index to determine active state
           _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
-          _buildNavBarItem(Icons.search, 'Search', _selectedIndex == 1, 1),
+          _buildNavBarItem(Icons.search, 'PostJob', _selectedIndex == 1, 1),
           _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 2, 2),
         ],
       ),
@@ -120,7 +120,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildPostJobBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 50,
