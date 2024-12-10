@@ -69,154 +69,156 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Post a Job',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _jobTitleController,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Job Title',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(color: Colors.grey),
+        child: SingleChildScrollView(  // <-- Wrap the entire column with SingleChildScrollView
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Post a Job',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
                   ),
-                  filled: true,
-                  fillColor: Color(0xFF2A2A2A),
                 ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _problemDescriptionController,
-                style: TextStyle(color: Colors.white),
-                maxLines: 5,
-                decoration: InputDecoration(
-                  hintText: 'Problem Description',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: Color(0xFF2A2A2A),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _hourlyPayController,
-                style: TextStyle(color: Colors.white),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  hintText: 'Proposed Hourly Pay (Rs.)',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: Color(0xFF2A2A2A),
-                ),
-              ),
-              SizedBox(height: 16.0),
-              TextField(
-                controller: _deadlineController,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Deadline (Pick a Date)',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: Color(0xFF2A2A2A),
-                ),
-                onTap: _selectDate,
-              ),
-              SizedBox(height: 16.0),
-
-              // Upload Pictures Section
-              Column(
-                children: [
-                  // Display uploaded images
-                  for (int i = 0; i < _selectedImages.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10.0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4CAF50),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          i == 0
-                              ? 'First picture uploaded'
-                              : 'Additional picture uploaded',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ),
+                SizedBox(height: 16.0),
+                TextField(
+                  controller: _jobTitleController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Job Title',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey),
                     ),
-                  if (_selectedImages.length < maxImages)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 20.0),
-                      child: GestureDetector(
-                        onTap: _pickImage,
+                    filled: true,
+                    fillColor: Color(0xFF2A2A2A),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                TextField(
+                  controller: _problemDescriptionController,
+                  style: TextStyle(color: Colors.white),
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    hintText: 'Problem Description',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    filled: true,
+                    fillColor: Color(0xFF2A2A2A),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                TextField(
+                  controller: _hourlyPayController,
+                  style: TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    hintText: 'Proposed Hourly Pay (Rs.)',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    filled: true,
+                    fillColor: Color(0xFF2A2A2A),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                TextField(
+                  controller: _deadlineController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Deadline (Pick a Date)',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    filled: true,
+                    fillColor: Color(0xFF2A2A2A),
+                  ),
+                  onTap: _selectDate,
+                ),
+                SizedBox(height: 16.0),
+
+                // Upload Pictures Section
+                Column(
+                  children: [
+                    // Display uploaded images
+                    for (int i = 0; i < _selectedImages.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10.0),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2A2A2A),
+                            color: const Color(0xFF4CAF50),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            _selectedImages.isEmpty
-                                ? 'Upload problem picture'
-                                : 'Upload additional picture',
+                            i == 0
+                                ? 'First picture uploaded'
+                                : 'Additional picture uploaded',
                             textAlign: TextAlign.center,
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
-                    ),
-                ],
-              ),
+                    if (_selectedImages.length < maxImages)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2A2A2A),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              _selectedImages.isEmpty
+                                  ? 'Upload problem picture'
+                                  : 'Upload additional picture',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
 
-              SizedBox(height: 16.0),
-              if (_errorMessage.isNotEmpty)
-                Text(
-                  _errorMessage,
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontSize: 16.0,
+                SizedBox(height: 16.0),
+                if (_errorMessage.isNotEmpty)
+                  Text(
+                    _errorMessage,
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 16.0,
+                    ),
                   ),
+                SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _postJob,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF4CAF50),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                  ),
+                  child: _isLoading
+                      ? CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                      : Text('Post Job'),
                 ),
-              SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _postJob,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF4CAF50),
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                ),
-                child: _isLoading
-                    ? CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                )
-                    : Text('Post Job'),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -299,6 +301,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
         _selectedImages.clear();  // Clear selected images
       });
 
+      Navigator.pushReplacementNamed(context, '/client_home');
     } catch (e) {
       setState(() {
         _isLoading = false;
