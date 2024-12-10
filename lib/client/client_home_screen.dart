@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({Key? key}) : super(key: key);
@@ -8,27 +9,42 @@ class ClientHomeScreen extends StatefulWidget {
 }
 
 class _ClientHomeScreenState extends State<ClientHomeScreen> {
-  // Add a state variable to track the current selected index
   int _selectedIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+  late Future<List<Map<String, dynamic>>> _workers;
 
-  // Method to handle bottom navigation item taps
+  @override
+  void initState() {
+    super.initState();
+    _workers = _fetchWorkers(); // Fetch workers from Firestore on initial load
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchWorkers() async {
+    final querySnapshot = await FirebaseFirestore.instance.collection('workers').get();
+    return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+  }
+
   void _onBottomNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    // Add navigation logic based on the selected index
     switch (index) {
       case 0:
-      // Already on home screen, do nothing
         break;
       case 1:
-      // Navigate to post_job screen
-        Navigator.pushNamed(context, '/post_job');
+        Navigator.pushNamed(context, '/post_job').then((_) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        });
         break;
       case 2:
-      // Navigate to profile screen
-        Navigator.pushNamed(context, '/client_profile');
+        Navigator.pushNamed(context, '/client_profile').then((_) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        });
         break;
     }
   }
@@ -48,9 +64,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildPostJobBar(),
-                      const SizedBox(height: 24),
-                      _buildCategoriesSection(),
+                      _buildSearchBar(),
                       const SizedBox(height: 24),
                       _buildPopularWorkersSection(),
                     ],
@@ -72,9 +86,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Pass the selected index to determine active state
           _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
-          _buildNavBarItem(Icons.search, 'PostJob', _selectedIndex == 1, 1),
+          _buildNavBarItem(Icons.post_add, 'Post Job', _selectedIndex == 1, 1),
           _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 2, 2),
         ],
       ),
@@ -120,7 +133,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     );
   }
 
-  Widget _buildPostJobBar() {
+  Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 50,
@@ -132,62 +145,17 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         children: [
           Icon(Icons.search, color: Colors.grey[600]),
           const SizedBox(width: 8),
-          Text(
-            'Search for services...',
-            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search for services...',
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                border: InputBorder.none,
+              ),
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCategoriesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Categories',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            _buildCategoryCard('Home Services'),
-            const SizedBox(width: 16),
-            _buildCategoryCard('Tech & IT'),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            _buildCategoryCard('Design & Creative'),
-            const SizedBox(width: 16),
-            _buildCategoryCard('Business'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategoryCard(String title) {
-    return Expanded(
-      child: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2A2A2A),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-          ),
-        ),
       ),
     );
   }
@@ -205,20 +173,43 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        _buildWorkerCard(
-          context: context,
-          name: 'John Smith',
-          profession: 'Web Developer',
-          rating: '4.9',
-          reviews: '120',
-        ),
-        const SizedBox(height: 16),
-        _buildWorkerCard(
-          context: context,
-          name: 'Sarah Johnson',
-          profession: 'Graphic Designer',
-          rating: '4.8',
-          reviews: '95',
+        FutureBuilder<List<Map<String, dynamic>>>(  // Fetching workers
+          future: _workers,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error loading workers'));
+            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No workers found'));
+            }
+
+            final workers = snapshot.data!;
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: workers.length,
+              itemBuilder: (context, index) {
+                final worker = workers[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),  // Space between profiles
+                  child: _buildWorkerCard(
+                    context: context,
+                    name: worker['fullName'] ?? 'Unknown',
+                    profession: worker['jobTitle'] ?? 'N/A',
+                    rating: worker['rating']?.toString() ?? '0.0',
+                    reviews: worker['reviews']?.toString() ?? '0',
+                    address: worker['address'] ?? 'N/A',
+                    hourlyRate: worker['hourlyRate']?.toStringAsFixed(0) ?? 'N/A',
+                    workExperience: worker['workExperience'] ?? 'N/A',
+                    jobsCompleted: worker['jobsCompleted']?.toString() ?? '0',
+                    profileImageUrl: worker['profileImage'],  // Get profile image URL
+                  ),
+                );
+              },
+            );
+          },
         ),
       ],
     );
@@ -230,19 +221,27 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     required String profession,
     required String rating,
     required String reviews,
+    required String address,
+    required String hourlyRate,
+    required String workExperience,
+    required String jobsCompleted,
+    required String? profileImageUrl,  // Add profileImageUrl parameter
   }) {
     return GestureDetector(
       onTap: () {
-        // Navigate to worker profile screen
         Navigator.pushNamed(
-            context,
-            '/client_profile',
-            arguments: {
-              'name': name,
-              'profession': profession,
-              'rating': rating,
-              'reviews': reviews,
-            }
+          context,
+          '/client_profile',
+          arguments: {
+            'name': name,
+            'profession': profession,
+            'rating': rating,
+            'reviews': reviews,
+            'address': address,
+            'hourlyRate': hourlyRate,
+            'workExperience': workExperience,
+            'jobsCompleted': jobsCompleted,
+          },
         );
       },
       child: Container(
@@ -253,12 +252,19 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         ),
         child: Row(
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFF333333),
-                shape: BoxShape.circle,
+            // Worker profile image
+            ClipOval(
+              child: profileImageUrl != null && profileImageUrl.isNotEmpty
+                  ? Image.network(
+                profileImageUrl,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              )
+                  : const Icon(
+                Icons.person,
+                color: Colors.white,
+                size: 50,
               ),
             ),
             const SizedBox(width: 16),
@@ -266,34 +272,82 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    profession,
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        address,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(
-                        Icons.star,
-                        color: Color(0xFF4CAF50),
-                        size: 16,
+                      Row(
+                        children: [
+                          Text(
+                            profession,
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '($workExperience yr)',  // Display work experience next to job title
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
                       Text(
-                        '$rating ($reviews reviews)',
+                        'Rs. $hourlyRate/hr',  // Display hourly rate at the far right
                         style: const TextStyle(
-                          color: Color(0xFF4CAF50),
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            color: Color(0xFF4CAF50),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$rating ($reviews reviews)',
+                            style: const TextStyle(
+                              color: Color(0xFF4CAF50),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '$jobsCompleted jobs done',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),  // Brighter color
                           fontSize: 14,
                         ),
                       ),
