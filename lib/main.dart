@@ -1,13 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gighire/base_user/signup_screen.dart';
-import 'package:gighire/client/client_home_screen.dart';
-import 'package:gighire/client/job_posting_screen.dart';
-import 'package:gighire/worker/worker_home_screen.dart';
-import 'package:gighire/worker/worker_profile_screen.dart';
-import 'package:gighire/base_user/login_screen.dart';
-import 'package:gighire/client/client_profile_screen.dart';
+import 'package:gighire/base_user/signup.dart';
+import 'package:gighire/client/client_home.dart';
+import 'package:gighire/client/job_posting.dart';
+import 'package:gighire/worker/worker_home.dart';
+import 'package:gighire/worker/worker_profile.dart';
+import 'package:gighire/base_user/login.dart';
+import 'package:gighire/client/client_profile.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
