@@ -20,18 +20,25 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       _selectedIndex = index;
     });
 
-    // Add navigation logic based on the selected index
     switch (index) {
       case 0:
       // Already on home screen, do nothing
         break;
       case 1:
       // Navigate to search screen
-        Navigator.pushNamed(context, '/search');
+        Navigator.pushNamed(context, '/search').then((_) {
+          setState(() {
+            _selectedIndex = 0;  // Reset to Home after returning from search page
+          });
+        });
         break;
       case 2:
       // Navigate to profile screen
-        Navigator.pushNamed(context, '/worker_profile');
+        Navigator.pushNamed(context, '/worker_profile').then((_) {
+          setState(() {
+            _selectedIndex = 0;  // Reset to Home after returning from profile page
+          });
+        });
         break;
     }
   }

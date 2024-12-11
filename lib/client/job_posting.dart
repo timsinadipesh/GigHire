@@ -21,12 +21,21 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
   final TextEditingController _problemDescriptionController = TextEditingController();
   final TextEditingController _hourlyPayController = TextEditingController();
   final TextEditingController _deadlineController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
   final List<File> _selectedImages = [];
   List<String?> _selectedImagesUrls = [];
   final int maxImages = 5;
 
   bool _isLoading = false;
   String _errorMessage = '';
+  String _locationOption = 'user_address';
+  String _userAddress = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserLocation();
+  }
 
   Future<void> _pickImage() async {
     if (_selectedImages.length < maxImages) {
@@ -64,12 +73,48 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
     }
   }
 
+  Future<void> _loadUserLocation() async {
+    try {
+      // Fetch the user's location from the 'workers' collection
+      DocumentSnapshot userDoc = await _firestore.collection('clients').doc(globalUserId).get();
+
+      if (userDoc.exists) {
+        String userAddress = userDoc['address'] ?? 'No address available';  // Use a default value if address is missing
+        setState(() {
+          _userAddress = userAddress;
+          _locationController.text = userAddress;  // Prefill the location field with the user's address
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load user location: $e';
+      });
+    }
+  }
+
+  // Function to update location based on selection
+  void _updateLocation() {
+    switch (_locationOption) {
+      case 'user_address':
+        _locationController.text = _userAddress;
+        break;
+      case 'remote':
+        _locationController.text = 'Remote';
+        break;
+      case 'custom':
+        _locationController.clear(); // Clear the location field for custom input
+        break;
+      default:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: SingleChildScrollView(  // <-- Wrap the entire column with SingleChildScrollView
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -78,10 +123,11 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                 Text(
                   'Post a Job',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF4CAF50),
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 16.0),
                 TextField(
@@ -98,11 +144,65 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                     fillColor: Color(0xFF2A2A2A),
                   ),
                 ),
+
+                // Location Selection Section
+                SizedBox(height: 10.0),
+                Row(
+                  children: [
+                    Text(
+                      'Location:',
+                      style: TextStyle(color: Colors.white, fontSize: 16.0),
+                    ),
+                    SizedBox(width: 10.0),
+                    DropdownButton<String>(
+                      value: _locationOption,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _locationOption = newValue!;
+                          _updateLocation();
+                        });
+                      },
+                      items: <String>['custom', 'user_address', 'remote']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value == 'custom' ? 'Custom Location' :
+                            value == 'user_address' ? 'User Address' : 'Remote',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      }).toList(),
+                      dropdownColor: Color(0xFF2A2A2A),
+                    ),
+                  ],
+                ),
+
+                // Display location text field
+                SizedBox(height: 16.0),
+                TextField(
+                  controller: _locationController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: _locationOption == 'user_address'
+                        ? 'Location (Your address)'
+                        : 'Location',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    suffixText: _locationOption == 'user_address' ? '(Your address)' : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    filled: true,
+                    fillColor: Color(0xFF2A2A2A),
+                  ),
+                ),
+
                 SizedBox(height: 16.0),
                 TextField(
                   controller: _problemDescriptionController,
                   style: TextStyle(color: Colors.white),
-                  maxLines: 5,
+                  maxLines: 4,
                   decoration: InputDecoration(
                     hintText: 'Problem Description',
                     hintStyle: TextStyle(color: Colors.grey),
@@ -114,6 +214,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                     fillColor: Color(0xFF2A2A2A),
                   ),
                 ),
+
                 SizedBox(height: 16.0),
                 TextField(
                   controller: _hourlyPayController,
@@ -130,6 +231,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                     fillColor: Color(0xFF2A2A2A),
                   ),
                 ),
+
                 SizedBox(height: 16.0),
                 TextField(
                   controller: _deadlineController,
@@ -194,16 +296,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                   ],
                 ),
 
-                SizedBox(height: 16.0),
-                if (_errorMessage.isNotEmpty)
-                  Text(
-                    _errorMessage,
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 5.0),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _postJob,
                   style: ElevatedButton.styleFrom(
@@ -225,7 +318,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
     );
   }
 
-  // This function will allow the user to pick a future date
+// This function will allow the user to pick a future date
   Future<void> _selectDate() async {
     final DateTime currentDate = DateTime.now();
     final DateTime selectedDate = await showDatePicker(
@@ -249,8 +342,9 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
     String problemDescription = _problemDescriptionController.text.trim();
     String hourlyPay = _hourlyPayController.text.trim();
     String deadline = _deadlineController.text.trim();
+    String location = _locationController.text.trim();  // Get the location
 
-    if (jobTitle.isEmpty || problemDescription.isEmpty || hourlyPay.isEmpty || deadline.isEmpty) {
+    if (jobTitle.isEmpty || problemDescription.isEmpty || hourlyPay.isEmpty || deadline.isEmpty || location.isEmpty) {
       setState(() {
         _isLoading = false;
         _errorMessage = 'Please fill in all the required fields.';
@@ -275,6 +369,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
         'problemDescription': problemDescription,
         'hourlyPay': hourlyPay,
         'deadline': deadline,
+        'location': location,  // Store the location
         'images': uploadedImageUrls,  // Store the uploaded image URLs
         'postedAt': FieldValue.serverTimestamp(),  // Timestamp of when the job was posted
         'userId': globalUserId,
@@ -297,6 +392,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
       _problemDescriptionController.clear();
       _hourlyPayController.clear();
       _deadlineController.clear();
+      _locationController.clear();  // Clear location field
       setState(() {
         _selectedImages.clear();  // Clear selected images
       });
@@ -310,3 +406,4 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
     }
   }
 }
+
