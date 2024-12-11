@@ -21,8 +21,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   Future<List<Map<String, dynamic>>> _fetchWorkers() async {
     final querySnapshot = await FirebaseFirestore.instance.collection('workers').get();
-    return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    return querySnapshot.docs.map((doc) {
+      // Include the documentId in the data
+      var workerData = doc.data() as Map<String, dynamic>;
+      workerData['documentId'] = doc.id; // Add documentId to the worker data
+      return workerData;
+    }).toList();
   }
+
 
   void _onBottomNavItemTapped(int index) {
     setState(() {
@@ -205,6 +211,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                     workExperience: worker['workExperience'] ?? 'N/A',
                     jobsCompleted: worker['jobsCompleted']?.toString() ?? '0',
                     profileImageUrl: worker['profileImage'],  // Get profile image URL
+                    userId: worker['documentId'], // Pass the userId
                   ),
                 );
               },
@@ -225,22 +232,16 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     required String hourlyRate,
     required String workExperience,
     required String jobsCompleted,
-    required String? profileImageUrl,  // Add profileImageUrl parameter
+    required String? profileImageUrl,
+    required String userId, // Add userId as a parameter
   }) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
           context,
-          '/client_profile',
+          '/worker_profile', // Ensure this route exists in your app
           arguments: {
-            'name': name,
-            'profession': profession,
-            'rating': rating,
-            'reviews': reviews,
-            'address': address,
-            'hourlyRate': hourlyRate,
-            'workExperience': workExperience,
-            'jobsCompleted': jobsCompleted,
+            'userId': userId, // Pass the userId to the profile page
           },
         );
       },

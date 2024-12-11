@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gighire/client/client_home.dart';
-import 'package:gighire/worker/worker_home.dart';
 import 'package:gighire/base_user/globals.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -62,15 +60,15 @@ class _LoginScreenState extends State<LoginScreen> {
         // Determine user role
         if (clientSnapshot.exists) {
           globalUserId = firebaseUser.uid;
-          Navigator.pushReplacement(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(builder: (context) => const ClientHomeScreen()),
+            '/client_home',
           );
         } else if (workerSnapshot.exists) {
           globalUserId = firebaseUser.uid;
-          Navigator.pushReplacement(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(builder: (context) => const WorkerHomeScreen()),
+            '/worker_home',
           );
         } else {
           // User not found in either collection

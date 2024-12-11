@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gighire/base_user/globals.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
-  final String? userId;
+  final String? userId; // Accept userId as a parameter
 
   const WorkerProfileScreen({Key? key, this.userId}) : super(key: key);
 
@@ -21,12 +20,35 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
   }
 
-  Future<void> _fetchUserData() async {
-    var userId = widget.userId ?? globalUserId;
-    _isOwnProfile = (userId == globalUserId);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Retrieve userId from the arguments passed to the screen
+    final args = ModalRoute.of(context)?.settings.arguments as Map?;
+
+    if (args != null) {
+      var userId = args['userId'];  // Retrieve userId from arguments
+      print('Received userId: $userId');  // Debugging line
+      _fetchUserData(userId);  // Call your data fetching function
+    } else {
+      // If no arguments passed, assume we're fetching the logged-in user's profile
+      var currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        _fetchUserData(currentUser.uid);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('User not logged in')),
+        );
+      }
+    }
+  }
+
+  Future<void> _fetchUserData(String? userId) async {
+    print('Fetching user data for userId: $userId'); // Debugging line
+    _isOwnProfile = (userId == FirebaseAuth.instance.currentUser?.uid);
 
     if (userId == null) {
       setState(() {
@@ -43,6 +65,9 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           .collection('workers')
           .doc(userId)
           .get();
+
+      print('Document exists: ${docSnapshot.exists}');
+      print('Document data: ${docSnapshot.data()}');
 
       if (docSnapshot.exists) {
         setState(() {
@@ -79,12 +104,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     try {
       // Sign out from Firebase Authentication
       await FirebaseAuth.instance.signOut();
-
-      // Clear globalUserId
-      setState(() {
-        globalUserId = null;
-      });
-
       // Navigate to the login screen
       Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
@@ -155,8 +174,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   ],
                 ),
               ),
-
-              // rating and job count row
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                 child: Row(
@@ -164,7 +181,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     // Rating Box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -175,7 +192,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                             Text(
                               'Rating:  ${(userData['rating'] ?? 0.0).toStringAsFixed(1)}/5',
                               style: TextStyle(
-                                fontSize: 14.0, // Reduced font size
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -184,12 +201,11 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.0), // Space between the two boxes
-
+                    SizedBox(width: 8.0),
                     // Job Count Box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -200,7 +216,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                             Text(
                               'Job count:  ${userData['job_count'] ?? 0}',
                               style: TextStyle(
-                                fontSize: 14.0, // Reduced font size
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -218,10 +234,10 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                 child: Row(
                   children: [
-                    // Rating Box
+                    // Hourly Pricing Box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -232,7 +248,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                             Text(
                               'Hourly Pricing:  ${(userData['hourlyRate']?.toInt() ?? 0)}',
                               style: TextStyle(
-                                fontSize: 14.0, // Reduced font size
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -241,12 +257,12 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.0), // Space between the two boxes
+                    SizedBox(width: 8.0),
 
                     // Experience box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0), // Reduced padding
+                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -257,7 +273,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                             Text(
                               'Experience: ${userData['workExperience'] ?? 0} years',
                               style: TextStyle(
-                                fontSize: 14.0, // Reduced font size
+                                fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -269,6 +285,53 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   ],
                 ),
               ),
+
+              if (!_isOwnProfile)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Hire Now action
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF4CAF50),
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'Hire Now',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Message action
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF2a2a2a),
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'Message',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               // Contact Information Section
               _buildSectionHeader('Contact Information'),
@@ -343,73 +406,21 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 ),
               ),
 
-              // Modify the Action Buttons section
-              if (!_isOwnProfile)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Hire Now action
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF4CAF50),
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            'Hire Now',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Message action
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF2a2a2a),
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            'Message',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-              // Logout Button at the bottom of the screen
+              const SizedBox(height: 40),
               if (_isOwnProfile)
-                const SizedBox(height: 40),
                 Center(
                   child: SizedBox(
                     width: 250,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _logout, // Call the logout function
+                      onPressed: _logout,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB71C1C), // Red color for logout
+                        backgroundColor: const Color(0xFFB71C1C),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
+                      child: const Text(
                         'Logout',
                         style: TextStyle(
                           color: Colors.white,
@@ -420,7 +431,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 40),
+                const SizedBox(height: 40),
             ],
           ),
         ),
@@ -428,7 +439,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     );
   }
 
-  // New helper method for information cards
+  // Helper method to create information cards
   Widget _buildInfoCard({
     required IconData icon,
     required String title,
@@ -548,30 +559,6 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard({required String value, required String label}) {
-    return Container(
-      width: 100,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Color(0xFF2a2a2a),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            value,
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          Text(
-            label,
-            style: TextStyle(color: Color(0xFF888888), fontSize: 12),
-          ),
-        ],
       ),
     );
   }

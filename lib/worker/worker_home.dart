@@ -34,7 +34,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         break;
       case 2:
       // Navigate to profile screen
-        Navigator.pushNamed(context, '/worker_profile').then((_) {
+        print('Navigating to worker profile with userId: $globalUserId');
+        Navigator.pushNamed(context, '/worker_profile', arguments: {"userId": globalUserId}).then((_) {
           setState(() {
             _selectedIndex = 0;  // Reset to Home after returning from profile page
           });
