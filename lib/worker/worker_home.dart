@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
+import 'package:gighire/worker/job_details.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({Key? key}) : super(key: key);
@@ -28,16 +29,20 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       // Navigate to search screen
         Navigator.pushNamed(context, '/search').then((_) {
           setState(() {
-            _selectedIndex = 0;  // Reset to Home after returning from search page
+            _selectedIndex =
+            0; // Reset to Home after returning from search page
           });
         });
         break;
       case 2:
       // Navigate to profile screen
-        print('Navigating to worker profile with userId: $globalUserId');
-        Navigator.pushNamed(context, '/worker_profile', arguments: {"userId": globalUserId}).then((_) {
+        debugPrint('Navigating to worker profile with userId: $globalUserId');
+        Navigator.pushNamed(
+            context, '/worker_profile', arguments: {"userId": globalUserId})
+            .then((_) {
           setState(() {
-            _selectedIndex = 0;  // Reset to Home after returning from profile page
+            _selectedIndex =
+            0; // Reset to Home after returning from profile page
           });
         });
         break;
@@ -47,73 +52,64 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserJobTitle(); // Fetch job title when screen loads
+    if (mounted) {
+      _fetchUserJobTitle(); // Ensure widget is mounted before fetching
+    }
   }
 
   void _fetchUserJobTitle() async {
-    final userDoc = FirebaseFirestore.instance.collection('workers').doc(globalUserId);
+    final userDoc = FirebaseFirestore.instance.collection('workers').doc(
+        globalUserId);
     DocumentSnapshot snapshot = await userDoc.get();
 
     if (snapshot.exists) {
-      print('User Document Data: ${snapshot.data()}');
+      debugPrint('User Document Data: ${snapshot.data()}');
       setState(() {
         jobTitle = snapshot.get('jobTitle'); // Check field name here
       });
-      print('Job Title fetched EXACTLY: $jobTitle');
+      debugPrint('Job Title fetched EXACTLY: $jobTitle');
       if (mounted) _fetchRecentJobs(); // Ensure _fetchRecentJobs is called
     }
   }
 
   void _fetchRecentJobs() async {
-    print('Starting to fetch recent jobs...');
-    if (jobTitle == null) {
-      print('jobTitle is null. Exiting _fetchRecentJobs.');
-      return;
-    }
     try {
-      print('Fetching jobs for jobTitle: $jobTitle');
+      debugPrint('Fetching all recent jobs');
 
-      // Fetch jobs filtered by jobTitle and sorted by timestamp
-      final jobTitleQuery = FirebaseFirestore.instance
+      final jobsQuery = FirebaseFirestore.instance
           .collection('jobs')
-          .where('jobTitle', isEqualTo: jobTitle) // Case-sensitive check
-          .orderBy('timestamp', descending: true)
-          .limit(5);
+          // .orderBy('timestamp', descending: true)
+          .limit(10); // Increased limit to show more jobs
 
-      QuerySnapshot titleSnapshot = await jobTitleQuery.get();
+      QuerySnapshot jobsSnapshot = await jobsQuery.get();
 
-      print('jobTitleQuery returned ${titleSnapshot.docs.length} results.');
-      for (var doc in titleSnapshot.docs) {
-        print('Document ID: ${doc.id}');
-        print('Data: ${doc.data()}');
-      }
+      debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
 
-      // Check if jobs exist for the given title
-      if (titleSnapshot.docs.isNotEmpty) {
-        List<Job> jobsList = titleSnapshot.docs.map((doc) {
-          print('Matched Job Data: ${doc.data()}');
+      if (jobsSnapshot.docs.isNotEmpty) {
+        List<Job> jobsList = jobsSnapshot.docs.map((doc) {
+          debugPrint('Job Data: ${doc.data()}');
           return Job.fromFirestore(doc);
         }).toList();
 
         if (mounted) {
           setState(() {
             recentJobs = jobsList;
-            print('Updated recentJobs: ${recentJobs.length}');
+            debugPrint('Updated recentJobs: ${recentJobs.length}');
           });
         }
       } else {
-        print('No jobs found for job title: $jobTitle');
+        debugPrint('No jobs found');
         if (mounted) {
           setState(() {
-            recentJobs = []; // Clear previous jobs
+            recentJobs = [];
           });
         }
       }
     } catch (e) {
-      print("Error in _fetchRecentJobs: $e");
+      debugPrint("Error in _fetchRecentJobs: $e");
       if (mounted) {
         setState(() {
-          recentJobs = []; // Clear on error
+          recentJobs = [];
         });
       }
     }
@@ -164,7 +160,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     );
   }
 
-  Widget _buildNavBarItem(IconData icon, String label, bool isSelected, int index) {
+  Widget _buildNavBarItem(IconData icon, String label, bool isSelected,
+      int index) {
     return GestureDetector(
       onTap: () => _onBottomNavItemTapped(index),
       child: Column(
@@ -231,34 +228,24 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Widget _buildRecentJobsSection() {
-    // Debug print to check job title and recent jobs
-    print('Job Title: $jobTitle');
-    print('Recent Jobs Count: ${recentJobs.length}');
-
-    if (jobTitle == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Recent $jobTitle Jobs',
-          style: const TextStyle(
+        const Text(
+          'Recent Jobs',
+          style: TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 16),
-        // Change the condition to explicitly check recentJobs
         if (recentJobs.isEmpty)
           const Text(
-            'No recent jobs found for your job title.',
+            'No recent jobs found.',
             style: TextStyle(color: Colors.white),
           )
         else
-        // Wrap job cards in a Column to ensure they are displayed vertically
           Column(
             children: recentJobs.map((job) =>
                 Padding(
@@ -272,82 +259,95 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Widget _buildJobCard(Job job) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: const Color(0xFF333333),
-              shape: BoxShape.circle,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => JobDetailsScreen(jobId: job.documentId),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  job.title, // Job title
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  job.location ?? 'Location: Remote', // Job location
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: const BoxDecoration( // Added const here
+                color: Color(0xFF333333),
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    job.title ?? 'Unknown Title', // Null check for job.title
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    job.location != null && job.location!.isNotEmpty
+                        ? job.location!
+                        : 'Location: Not specified', // Provide a default value
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// Model to represent a Job
 class Job {
   final String title;
   final String location;
   final String? description;
   final int timestamp;
+  final String documentId; // Add this property
 
   Job({
     required this.title,
     required this.location,
     this.description,
     required this.timestamp,
+    required this.documentId,
   });
 
   // Factory constructor to create a Job object from Firestore DocumentSnapshot
   factory Job.fromFirestore(DocumentSnapshot doc) {
     try {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      print('Parsing job document: ${doc.id}, Data: $data');
+      debugPrint('Parsing job document: ${doc.id}, Data: $data');
 
       return Job(
         title: data['jobTitle'] ?? 'Unknown',
         location: data['location'] ?? 'Remote',
         description: data['description'],
-        // Convert Firestore Timestamp to milliseconds since epoch
         timestamp: (data['timestamp'] is Timestamp)
             ? (data['timestamp'] as Timestamp).millisecondsSinceEpoch
             : data['timestamp'] ?? 0,
+        documentId: doc.id, // Set documentId from the snapshot
       );
     } catch (e) {
-      print('Error parsing job document ${doc.id}: $e');
+      debugPrint('Error parsing job document ${doc.id}: $e');
       rethrow;
     }
   }

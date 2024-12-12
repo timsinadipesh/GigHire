@@ -246,7 +246,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Hourly Pricing:  ${(userData['hourlyRate']?.toInt() ?? 0)}',
+                              'Pricing/Hr:  ${(userData['hourlyRate']?.toInt() ?? 0)}',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
@@ -271,7 +271,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Experience: ${userData['workExperience'] ?? 0} years',
+                              'Experience: ${userData['workExperience'] ?? 0} yr',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,

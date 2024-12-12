@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gighire/base_user/globals.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -144,6 +145,7 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
           .set(workerData);
 
       // Navigate to home screen
+      globalUserId = userId;
       Navigator.pushReplacementNamed(context, '/worker_home');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
