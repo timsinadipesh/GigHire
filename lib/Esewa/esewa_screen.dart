@@ -8,7 +8,10 @@ class EsewaScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Essewa Payment'),
+        title: const Text('Esewa Payment'),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.grey,
+        elevation: 0,
       ),
       body: ListView(
         padding: const EdgeInsets.all(24.0),
