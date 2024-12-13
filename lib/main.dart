@@ -8,6 +8,7 @@ import 'package:gighire/worker/worker_home.dart';
 import 'package:gighire/worker/worker_profile.dart';
 import 'package:gighire/base_user/login.dart';
 import 'package:gighire/client/client_profile.dart';
+import 'package:gighire/client/chat_list.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
         '/post_job': (context) => const JobPostingScreen(),
         '/worker_home': (context) => const WorkerHomeScreen(),
         '/worker_profile': (context) => const WorkerProfileScreen(),
+        '/chat_list': (context) => ChatList(),
       },
     );
   }

@@ -20,7 +20,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchWorkers() async {
-    final querySnapshot = await FirebaseFirestore.instance.collection('workers').get();
+    final querySnapshot =
+        await FirebaseFirestore.instance.collection('workers').get();
     return querySnapshot.docs.map((doc) {
       // Include the documentId in the data
       var workerData = doc.data() as Map<String, dynamic>;
@@ -28,7 +29,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       return workerData;
     }).toList();
   }
-
 
   void _onBottomNavItemTapped(int index) {
     setState(() {
@@ -38,6 +38,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     switch (index) {
       case 0:
         break;
+      //post job
       case 1:
         Navigator.pushNamed(context, '/post_job').then((_) {
           setState(() {
@@ -45,7 +46,16 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           });
         });
         break;
+      // chat
       case 2:
+        Navigator.pushNamed(context, '/chat_list').then((_) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        });
+        break;
+      //client profile
+      case 3:
         Navigator.pushNamed(context, '/client_profile').then((_) {
           setState(() {
             _selectedIndex = 0;
@@ -94,13 +104,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         children: [
           _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
           _buildNavBarItem(Icons.post_add, 'Post Job', _selectedIndex == 1, 1),
-          _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 2, 2),
+          _buildNavBarItem(Icons.chat, 'chat', _selectedIndex == 2, 2),
+          _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 3, 3),
         ],
       ),
     );
   }
 
-  Widget _buildNavBarItem(IconData icon, String label, bool isSelected, int index) {
+  Widget _buildNavBarItem(
+      IconData icon, String label, bool isSelected, int index) {
     return GestureDetector(
       onTap: () => _onBottomNavItemTapped(index),
       child: Column(
@@ -179,7 +191,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        FutureBuilder<List<Map<String, dynamic>>>(  // Fetching workers
+        FutureBuilder<List<Map<String, dynamic>>>(
+          // Fetching workers
           future: _workers,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -199,7 +212,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               itemBuilder: (context, index) {
                 final worker = workers[index];
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),  // Space between profiles
+                  padding: const EdgeInsets.only(
+                      bottom: 16.0), // Space between profiles
                   child: _buildWorkerCard(
                     context: context,
                     name: worker['fullName'] ?? 'Unknown',
@@ -207,10 +221,12 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                     rating: worker['rating']?.toString() ?? '0.0',
                     reviews: worker['reviews']?.toString() ?? '0',
                     address: worker['address'] ?? 'N/A',
-                    hourlyRate: worker['hourlyRate']?.toStringAsFixed(0) ?? 'N/A',
+                    hourlyRate:
+                        worker['hourlyRate']?.toStringAsFixed(0) ?? 'N/A',
                     workExperience: worker['workExperience'] ?? 'N/A',
                     jobsCompleted: worker['jobsCompleted']?.toString() ?? '0',
-                    profileImageUrl: worker['profileImage'],  // Get profile image URL
+                    profileImageUrl:
+                        worker['profileImage'], // Get profile image URL
                     userId: worker['documentId'], // Pass the userId
                   ),
                 );
@@ -257,16 +273,16 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
             ClipOval(
               child: profileImageUrl != null && profileImageUrl.isNotEmpty
                   ? Image.network(
-                profileImageUrl,
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-              )
+                      profileImageUrl,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    )
                   : const Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 50,
-              ),
+                      Icons.person,
+                      color: Colors.white,
+                      size: 50,
+                    ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -307,7 +323,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '($workExperience yr)',  // Display work experience next to job title
+                            '($workExperience yr)', // Display work experience next to job title
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: 14,
@@ -316,7 +332,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                         ],
                       ),
                       Text(
-                        'Rs. $hourlyRate/hr',  // Display hourly rate at the far right
+                        'Rs. $hourlyRate/hr', // Display hourly rate at the far right
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -348,7 +364,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                       Text(
                         '$jobsCompleted jobs done',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),  // Brighter color
+                          color:
+                              Colors.white.withOpacity(0.8), // Brighter color
                           fontSize: 14,
                         ),
                       ),
