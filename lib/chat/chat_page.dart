@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gighire/Components/text_field.dart';
-import 'package:gighire/Components/chat_bubble.dart';
+import 'package:gighire/chat/Components/text_field.dart';
+import 'package:gighire/chat/Components/chat_bubble.dart';
 import 'package:gighire/services/chat_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
