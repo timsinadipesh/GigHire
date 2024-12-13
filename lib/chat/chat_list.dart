@@ -1,43 +1,41 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:gighire/Components/user_tile.dart';
 import 'package:gighire/chat/chat_page.dart';
 import 'package:gighire/services/chat_service.dart';
 
-//manages the list of messages in a conversation.
 class ChatList extends StatelessWidget {
   ChatList({super.key});
 
-  // Chat and Auth services
   final ChatService _chatService = ChatService();
-  // final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat"),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.grey,
-        elevation: 0,
+        title: const Text(
+          "Chat",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.black87,
+        foregroundColor: Colors.green,
+        elevation: 2,
       ),
-      body: _buildUserList(),
+      body: Container(
+        color: Colors.black87,
+        child: _buildUserList(),
+      ),
     );
   }
 
-  // Function to determine user type
   Future<String> getUserType() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
-
-    // Get the currently signed-in user
     User? user = auth.currentUser;
 
     if (user == null) {
       throw Exception("No user signed in");
     }
 
-    // Check if user exists in the 'workers' collection
     var workerSnapshot = await FirebaseFirestore.instance
         .collection('workers')
         .doc(user.uid)
@@ -47,7 +45,6 @@ class ChatList extends StatelessWidget {
       return "worker";
     }
 
-    // Check if user exists in the 'clients' collection
     var clientSnapshot = await FirebaseFirestore.instance
         .collection('clients')
         .doc(user.uid)
@@ -60,63 +57,43 @@ class ChatList extends StatelessWidget {
     throw Exception("User type not found");
   }
 
-  // Build a list of users based on user type
   Widget _buildUserList() {
     return FutureBuilder<String>(
-      future: getUserType(), // Get the user type asynchronously
+      future: getUserType(),
       builder: (context, userTypeSnapshot) {
-        // Error handling for getUserType()
         if (userTypeSnapshot.hasError) {
-          return const Center(
-            child: Text("Error determining user type"),
-          );
+          return _buildErrorMessage("Error determining user type");
         }
 
-        // Waiting for user type to resolve
         if (userTypeSnapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return _buildLoadingIndicator();
         }
 
-        // Check if userTypeSnapshot has data
         if (!userTypeSnapshot.hasData) {
-          return const Center(
-            child: Text("User type not found"),
-          );
+          return _buildErrorMessage("User type not found");
         }
 
         String userType = userTypeSnapshot.data!;
 
-        // Build the StreamBuilder with the appropriate stream
         return StreamBuilder<List<Map<String, dynamic>>>(
           stream: userType == 'worker'
-              ? _chatService.getClientsStream() // Show clients for workers
-              : _chatService.getWorkersStream(), // Show workers for clients
+              ? _chatService.getClientsStream()
+              : _chatService.getWorkersStream(),
           builder: (context, snapshot) {
-            // Error handling for stream
             if (snapshot.hasError) {
-              return const Center(
-                child: Text("Error loading user list"),
-              );
+              return _buildErrorMessage("Error loading user list");
             }
 
-            // Loading state for stream
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return _buildLoadingIndicator();
             }
 
-            // Check if snapshot has data
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(
-                child: Text("No users found"),
-              );
+              return _buildEmptyState();
             }
 
-            // Return list of users
             return ListView(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
               children: snapshot.data!
                   .map<Widget>(
                       (userData) => _buildUserListItem(userData, context))
@@ -128,23 +105,69 @@ class ChatList extends StatelessWidget {
     );
   }
 
-  // Build individual list tile for user
   Widget _buildUserListItem(
       Map<String, dynamic> userData, BuildContext context) {
-    return UserTile(
-      text: userData["email"],
-      onTap: () {
-        // Tapped on a user -> go to chat page
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatPage(
-              receiverEmail: userData["email"],
-              receiverID: userData["documentId"],
+    return Card(
+      color: Colors.grey[800],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.grey[600],
+          child: Icon(Icons.person, color: Colors.white),
+        ),
+        title: Text(
+          userData["email"],
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatPage(
+                receiverEmail: userData["email"],
+                receiverID: userData["documentId"],
+              ),
             ),
+          );
+        },
+        // trailing: Icon(Icons.chat, color: Colors.greenAccent),
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Center(
+      child: CircularProgressIndicator(
+        color: Colors.greenAccent,
+        strokeWidth: 2.5,
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage(String message) {
+    return Center(
+      child: Text(
+        message,
+        style: const TextStyle(color: Colors.redAccent, fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.person_off, size: 80, color: Colors.grey[700]),
+          const SizedBox(height: 20),
+          Text(
+            "No users found",
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

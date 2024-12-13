@@ -13,6 +13,7 @@ class MyTextfield extends StatelessWidget {
     required this.controller,
     this.focusNode,
   });
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -23,17 +24,15 @@ class MyTextfield extends StatelessWidget {
         focusNode: focusNode,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Theme.of(context).colorScheme.tertiary),
+            borderSide: BorderSide(color: Colors.grey.shade600),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Theme.of(context).colorScheme.secondary),
+            borderSide: BorderSide(color: Colors.white10),
           ),
-          fillColor: Theme.of(context).colorScheme.secondary,
+          fillColor: Colors.grey.shade800,
           filled: true,
           hintText: hintText,
-          hintStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+          hintStyle: TextStyle(color: Colors.white30),
         ),
       ),
     );

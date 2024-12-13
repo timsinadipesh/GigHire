@@ -52,6 +52,7 @@
 //     );
 //   }
 // }
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,7 +65,7 @@ import 'package:gighire/worker/worker_profile.dart';
 import 'package:gighire/base_user/login.dart';
 import 'package:gighire/client/client_profile.dart';
 import 'package:gighire/chat/chat_list.dart';
-import 'package:gighire/Theme/theme_provider.dart'; // Import your ThemeProvider
+import 'package:gighire/Theme/theme_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,22 +78,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Set system overlay style for status bar
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
+        // statusBarColor: Colors.black12,
         statusBarIconBrightness: Brightness.light,
       ),
     );
 
     return ChangeNotifierProvider(
-      create: (_) => ThemeProvider(), // Provide ThemeProvider here
+      create: (_) => ThemeProvider(),
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
             title: 'Service Marketplace',
             debugShowCheckedModeBanner: false,
-            theme: themeProvider.themeData, // Use theme from ThemeProvider
+            theme: themeProvider.themeData,
             initialRoute: '/login',
             routes: {
               '/login': (context) => const LoginScreen(),
