@@ -23,26 +23,36 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
     switch (index) {
       case 0:
-      // Already on home screen, do nothing
+        // Already on home screen, do nothing
         break;
       case 1:
-      // Navigate to search screen
+        // Navigate to search screen
         Navigator.pushNamed(context, '/search').then((_) {
           setState(() {
             _selectedIndex =
-            0; // Reset to Home after returning from search page
+                0; // Reset to Home after returning from search page
           });
         });
         break;
+      //chat
       case 2:
-      // Navigate to profile screen
-        debugPrint('Navigating to worker profile with userId: $globalUserId');
-        Navigator.pushNamed(
-            context, '/worker_profile', arguments: {"userId": globalUserId})
-            .then((_) {
+        // Navigate to search screen
+        Navigator.pushNamed(context, '/chat_list').then((_) {
           setState(() {
             _selectedIndex =
-            0; // Reset to Home after returning from profile page
+                0; // Reset to Home after returning from search page
+          });
+        });
+        break;
+      //profile
+      case 3:
+        // Navigate to profile screen
+        debugPrint('Navigating to worker profile with userId: $globalUserId');
+        Navigator.pushNamed(context, '/worker_profile',
+            arguments: {"userId": globalUserId}).then((_) {
+          setState(() {
+            _selectedIndex =
+                0; // Reset to Home after returning from profile page
           });
         });
         break;
@@ -58,8 +68,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   void _fetchUserJobTitle() async {
-    final userDoc = FirebaseFirestore.instance.collection('workers').doc(
-        globalUserId);
+    final userDoc =
+        FirebaseFirestore.instance.collection('workers').doc(globalUserId);
     DocumentSnapshot snapshot = await userDoc.get();
 
     if (snapshot.exists) {
@@ -154,14 +164,15 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         children: [
           _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
           _buildNavBarItem(Icons.search, 'Search', _selectedIndex == 1, 1),
-          _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 2, 2),
+          _buildNavBarItem(Icons.chat, 'chat', _selectedIndex == 2, 2),
+          _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 3, 3),
         ],
       ),
     );
   }
 
-  Widget _buildNavBarItem(IconData icon, String label, bool isSelected,
-      int index) {
+  Widget _buildNavBarItem(
+      IconData icon, String label, bool isSelected, int index) {
     return GestureDetector(
       onTap: () => _onBottomNavItemTapped(index),
       child: Column(
@@ -247,12 +258,11 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           )
         else
           Column(
-            children: recentJobs.map((job) =>
-                Padding(
+            children: recentJobs
+                .map((job) => Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: _buildJobCard(job)
-                )
-            ).toList(),
+                    child: _buildJobCard(job)))
+                .toList(),
           ),
       ],
     );
@@ -279,7 +289,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             Container(
               width: 50,
               height: 50,
-              decoration: const BoxDecoration( // Added const here
+              decoration: const BoxDecoration(
+                // Added const here
                 color: Color(0xFF333333),
                 shape: BoxShape.circle,
               ),

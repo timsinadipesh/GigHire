@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gighire/chat/chat.dart';
 import 'package:gighire/Services/Auth/auth_service.dart';
-import 'package:gighire/chat/chat_page.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// defines the structure or model for
 class Message {
   final String senderID;
   final String senderEmail;

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 
+//Handles user authentication/login.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -35,8 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       // Attempt Firebase Authentication
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -173,7 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         return 'Please enter your email';
                       }
                       // Basic email validation
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      final emailRegex =
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                       if (!emailRegex.hasMatch(value)) {
                         return 'Please enter a valid email';
                       }
@@ -222,13 +224,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                              'Login',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
 
@@ -254,7 +256,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: const Text(
                               'Google',
-                              style: TextStyle(color: Colors.white, fontSize: 14),
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
                             ),
                           ),
                         ),
@@ -273,7 +276,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: const Text(
                               'Apple',
-                              style: TextStyle(color: Colors.white, fontSize: 14),
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
                             ),
                           ),
                         ),
@@ -288,7 +292,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const Text(
                         'Don\'t have an account? ',
-                        style: TextStyle(color: Color(0xFF888888), fontSize: 14),
+                        style:
+                            TextStyle(color: Color(0xFF888888), fontSize: 14),
                       ),
                       GestureDetector(
                         onTap: () {

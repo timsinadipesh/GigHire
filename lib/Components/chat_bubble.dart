@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gighire/Theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 
+//handles the UI for individual messages.
 class ChatBubble extends StatelessWidget {
   final String message;
   final bool isCurrentUser;
