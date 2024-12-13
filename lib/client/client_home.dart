@@ -29,7 +29,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     }).toList();
   }
 
-
   void _onBottomNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -64,18 +63,49 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           children: [
             _buildTitle(),
             Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSearchBar(),
-                      const SizedBox(height: 24),
-                      _buildPopularWorkersSection(),
-                    ],
-                  ),
-                ),
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future: _workers,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: const Center(child: Text('Error loading workers')),
+                    );
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: const Center(child: Text('No workers found')),
+                    );
+                  }
+
+                  final workers = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: workers.length,
+                    itemBuilder: (context, index) {
+                      final worker = workers[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),  // Space between profiles
+                        child: _buildWorkerCard(
+                          context: context,
+                          name: worker['fullName'] ?? 'Unknown',
+                          profession: worker['jobTitle'] ?? 'N/A',
+                          rating: worker['rating']?.toString() ?? '0.0',
+                          reviews: worker['reviews']?.toString() ?? '0',
+                          address: worker['address'] ?? 'N/A',
+                          hourlyRate: worker['hourlyRate']?.toStringAsFixed(0) ?? 'N/A',
+                          workExperience: worker['workExperience'] ?? 'N/A',
+                          jobsCompleted: worker['jobsCompleted']?.toString() ?? '0',
+                          profileImageUrl: worker['profileImage'],  // Get profile image URL
+                          userId: worker['documentId'], // Pass the userId
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
             _buildBottomNavBar(),
@@ -163,62 +193,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPopularWorkersSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Popular Workers',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        FutureBuilder<List<Map<String, dynamic>>>(  // Fetching workers
-          future: _workers,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return const Center(child: Text('Error loading workers'));
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No workers found'));
-            }
-
-            final workers = snapshot.data!;
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: workers.length,
-              itemBuilder: (context, index) {
-                final worker = workers[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),  // Space between profiles
-                  child: _buildWorkerCard(
-                    context: context,
-                    name: worker['fullName'] ?? 'Unknown',
-                    profession: worker['jobTitle'] ?? 'N/A',
-                    rating: worker['rating']?.toString() ?? '0.0',
-                    reviews: worker['reviews']?.toString() ?? '0',
-                    address: worker['address'] ?? 'N/A',
-                    hourlyRate: worker['hourlyRate']?.toStringAsFixed(0) ?? 'N/A',
-                    workExperience: worker['workExperience'] ?? 'N/A',
-                    jobsCompleted: worker['jobsCompleted']?.toString() ?? '0',
-                    profileImageUrl: worker['profileImage'],  // Get profile image URL
-                    userId: worker['documentId'], // Pass the userId
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ],
     );
   }
 

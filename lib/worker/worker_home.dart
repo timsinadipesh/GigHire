@@ -12,10 +12,9 @@ class WorkerHomeScreen extends StatefulWidget {
 
 class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   int _selectedIndex = 0;
-  String? jobTitle; // The job title of the current logged-in user
-  List<Job> recentJobs = []; // List to store recent jobs
+  String? jobTitle;
+  List<Job> recentJobs = [];
 
-  // Method to handle bottom navigation item taps
   void _onBottomNavItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -23,26 +22,23 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
     switch (index) {
       case 0:
-      // Already on home screen, do nothing
         break;
       case 1:
-      // Navigate to search screen
         Navigator.pushNamed(context, '/search').then((_) {
           setState(() {
-            _selectedIndex =
-            0; // Reset to Home after returning from search page
+            _selectedIndex = 0;
           });
         });
         break;
       case 2:
-      // Navigate to profile screen
         debugPrint('Navigating to worker profile with userId: $globalUserId');
         Navigator.pushNamed(
-            context, '/worker_profile', arguments: {"userId": globalUserId})
-            .then((_) {
+          context,
+          '/worker_profile',
+          arguments: {"userId": globalUserId},
+        ).then((_) {
           setState(() {
-            _selectedIndex =
-            0; // Reset to Home after returning from profile page
+            _selectedIndex = 0;
           });
         });
         break;
@@ -53,22 +49,20 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   void initState() {
     super.initState();
     if (mounted) {
-      _fetchUserJobTitle(); // Ensure widget is mounted before fetching
+      _fetchUserJobTitle();
     }
   }
 
   void _fetchUserJobTitle() async {
-    final userDoc = FirebaseFirestore.instance.collection('workers').doc(
-        globalUserId);
+    final userDoc = FirebaseFirestore.instance.collection('workers').doc(globalUserId);
     DocumentSnapshot snapshot = await userDoc.get();
 
     if (snapshot.exists) {
       debugPrint('User Document Data: ${snapshot.data()}');
       setState(() {
-        jobTitle = snapshot.get('jobTitle'); // Check field name here
+        jobTitle = snapshot.get('jobTitle');
       });
-      debugPrint('Job Title fetched EXACTLY: $jobTitle');
-      if (mounted) _fetchRecentJobs(); // Ensure _fetchRecentJobs is called
+      if (mounted) _fetchRecentJobs();
     }
   }
 
@@ -76,27 +70,24 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     try {
       debugPrint('Fetching all recent jobs');
 
-      final jobsQuery = FirebaseFirestore.instance
-          .collection('jobs')
-          // .orderBy('timestamp', descending: true)
-          .limit(10); // Increased limit to show more jobs
-
+      final jobsQuery = FirebaseFirestore.instance.collection('jobs').limit(10);
       QuerySnapshot jobsSnapshot = await jobsQuery.get();
 
       debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
 
       if (jobsSnapshot.docs.isNotEmpty) {
-        List<Job> jobsList = jobsSnapshot.docs.map((doc) {
-          debugPrint('Job Data: ${doc.data()}');
-          return Job.fromFirestore(doc);
-        }).toList();
-
-        if (mounted) {
-          setState(() {
-            recentJobs = jobsList;
-            debugPrint('Updated recentJobs: ${recentJobs.length}');
-          });
+        List<Job> jobsList = [];
+        for (var doc in jobsSnapshot.docs) {
+          try {
+            debugPrint('Job Data: ${doc.data()}');
+            jobsList.add(Job.fromFirestore(doc));
+          } catch (e) {
+            debugPrint('Error parsing job document ${doc.id}: $e');
+          }
         }
+        setState(() {
+          recentJobs = jobsList;
+        });
       } else {
         debugPrint('No jobs found');
         if (mounted) {
@@ -130,8 +121,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSearchBar(),
-                      const SizedBox(height: 24),
                       _buildRecentJobsSection(),
                     ],
                   ),
@@ -160,8 +149,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     );
   }
 
-  Widget _buildNavBarItem(IconData icon, String label, bool isSelected,
-      int index) {
+  Widget _buildNavBarItem(IconData icon, String label, bool isSelected, int index) {
     return GestureDetector(
       onTap: () => _onBottomNavItemTapped(index),
       child: Column(
@@ -200,33 +188,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      height: 50,
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              style: const TextStyle(color: Colors.grey),
-              decoration: InputDecoration(
-                hintText: 'Search for jobs...',
-                hintStyle: TextStyle(color: Colors.grey[600]),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildRecentJobsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,12 +208,10 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           )
         else
           Column(
-            children: recentJobs.map((job) =>
-                Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: _buildJobCard(job)
-                )
-            ).toList(),
+            children: recentJobs.map((job) => Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: _buildJobCard(job),
+            )).toList(),
           ),
       ],
     );
@@ -274,40 +233,36 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           color: const Color(0xFF2A2A2A),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: const BoxDecoration( // Added const here
-                color: Color(0xFF333333),
-                shape: BoxShape.circle,
+            Text(
+              job.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    job.title ?? 'Unknown Title', // Null check for job.title
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    job.location != null && job.location!.isNotEmpty
-                        ? job.location!
-                        : 'Location: Not specified', // Provide a default value
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 4),
+            Text(
+              'Location: ${job.location}',
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Hourly Pay: \$${job.hourlyPay}',
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Deadline: ${job.deadline}',
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              job.description ?? 'No description provided.',
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
           ],
         ),
@@ -320,35 +275,28 @@ class Job {
   final String title;
   final String location;
   final String? description;
-  final int timestamp;
-  final String documentId; // Add this property
+  final String hourlyPay;
+  final String deadline;
+  final String documentId;
 
   Job({
     required this.title,
     required this.location,
     this.description,
-    required this.timestamp,
+    required this.hourlyPay,
+    required this.deadline,
     required this.documentId,
   });
 
-  // Factory constructor to create a Job object from Firestore DocumentSnapshot
   factory Job.fromFirestore(DocumentSnapshot doc) {
-    try {
-      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      debugPrint('Parsing job document: ${doc.id}, Data: $data');
-
-      return Job(
-        title: data['jobTitle'] ?? 'Unknown',
-        location: data['location'] ?? 'Remote',
-        description: data['description'],
-        timestamp: (data['timestamp'] is Timestamp)
-            ? (data['timestamp'] as Timestamp).millisecondsSinceEpoch
-            : data['timestamp'] ?? 0,
-        documentId: doc.id, // Set documentId from the snapshot
-      );
-    } catch (e) {
-      debugPrint('Error parsing job document ${doc.id}: $e');
-      rethrow;
-    }
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Job(
+      title: data['jobTitle'] ?? 'Unknown',
+      location: data['location'] ?? 'Not specified',
+      description: data['problemDescription'] ?? 'No description provided',
+      hourlyPay: data['hourlyPay']?.toString() ?? '0',
+      deadline: data['deadline'] ?? 'No deadline specified',
+      documentId: doc.id,
+    );
   }
 }
