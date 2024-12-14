@@ -36,8 +36,10 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
     switch (index) {
       case 0:
+      // Home
         break;
       case 1:
+      // Post Job
         Navigator.pushNamed(context, '/post_job').then((_) {
           setState(() {
             _selectedIndex = 0;
@@ -45,6 +47,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         });
         break;
       case 2:
+      // Chat
+        Navigator.pushNamed(context, '/chat_list').then((_) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        });
+        break;
+      case 3:
+      // Profile
         Navigator.pushNamed(context, '/client_profile').then((_) {
           setState(() {
             _selectedIndex = 0;
@@ -124,7 +135,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         children: [
           _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
           _buildNavBarItem(Icons.post_add, 'Post Job', _selectedIndex == 1, 1),
-          _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 2, 2),
+          _buildNavBarItem(Icons.chat, 'Chat', _selectedIndex == 2, 2), // New Chat button
+          _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 3, 3),
         ],
       ),
     );

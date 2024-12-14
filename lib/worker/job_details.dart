@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gighire/chat/messaging.dart';
 
 class JobDetailsScreen extends StatefulWidget {
   final String jobId;
@@ -14,6 +15,7 @@ class JobDetailsScreen extends StatefulWidget {
 class _JobDetailsScreenState extends State<JobDetailsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Map<String, dynamic>? _jobDetails;
+  Map<String, dynamic>? _posterDetails;
   bool _isLoading = true;
   String _errorMessage = '';
 
@@ -31,8 +33,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           .get();
 
       if (jobDoc.exists) {
+        _jobDetails = jobDoc.data() as Map<String, dynamic>;
+        await _fetchPosterDetails(_jobDetails?['userId']);
         setState(() {
-          _jobDetails = jobDoc.data() as Map<String, dynamic>;
           _isLoading = false;
         });
       } else {
@@ -46,6 +49,25 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
         _errorMessage = 'Failed to load job details: ${e.toString()}';
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _fetchPosterDetails(String? userId) async {
+    if (userId == null) return;
+
+    try {
+      DocumentSnapshot userDoc = await _firestore
+          .collection('clients')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        _posterDetails = userDoc.data() as Map<String, dynamic>;
+      } else {
+        _posterDetails = {'fullName': 'Unknown'};
+      }
+    } catch (e) {
+      _posterDetails = {'name': 'Error fetching user'};
     }
   }
 
@@ -94,6 +116,26 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
               // Job Details Grid
               _buildJobDetailsGrid(),
 
+              // Posted At
+              SizedBox(height: 16.0),
+              Text(
+                'Posted At: ${_jobDetails?['postedAt']?.toDate().toString() ?? 'Unknown'}',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16.0,
+                ),
+              ),
+
+              // Poster Details
+              SizedBox(height: 16.0),
+              Text(
+                'Posted By: ${_posterDetails?['fullName'] ?? 'Unknown'}',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16.0,
+                ),
+              ),
+
               // Problem Description
               SizedBox(height: 16.0),
               Text(
@@ -117,26 +159,58 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
               SizedBox(height: 16.0),
               _buildImagesSection(),
 
-              // Action Button
+              // Action Buttons
               SizedBox(height: 24.0),
               Center(
-                child: ElevatedButton(
-                  onPressed: _applyForJob,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF4CAF50),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(
-                        vertical: 16.0,
-                        horizontal: 32.0
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _applyForJob,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF4CAF50),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(
+                            vertical: 16.0, horizontal: 32.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      child: Text(
+                        'Apply for Job',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                    SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () {
+                        final clientId = _jobDetails?['userId'];
+                        if (clientId != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MessagingScreen(
+                                otherUserId: clientId,
+                              ),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Unable to message the job poster.')),
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF4CAF50),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                      ),
+                      child: Text(
+                        'Message Poster',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'Apply for Job',
-                    style: TextStyle(fontSize: 16.0),
-                  ),
+                  ],
                 ),
               ),
             ],
@@ -238,9 +312,6 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   }
 
   void _applyForJob() {
-    // TODO: Implement job application logic
-    // This could open a bottom sheet, navigate to an application form,
-    // or send an application to the client
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Job application feature coming soon!'),

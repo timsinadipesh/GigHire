@@ -314,7 +314,19 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // Message action
+                            final args = ModalRoute.of(context)?.settings.arguments as Map?;
+                            var userId = args!['userId'];
+                            if (userId != null) {
+                              Navigator.pushNamed(
+                                context,
+                                '/message',
+                                arguments: {'otherUserId': userId},
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Unable to message the job poster.')),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF2a2a2a),

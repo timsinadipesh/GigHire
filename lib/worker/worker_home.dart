@@ -23,14 +23,17 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     switch (index) {
       case 0:
         break;
-      case 1:
-        Navigator.pushNamed(context, '/search').then((_) {
+      case 1: // Chat button
+        Navigator.pushNamed(
+          context,
+          '/chat_list',
+        ).then((_) {
           setState(() {
             _selectedIndex = 0;
           });
         });
         break;
-      case 2:
+      case 2: // Profile button
         debugPrint('Navigating to worker profile with userId: $globalUserId');
         Navigator.pushNamed(
           context,
@@ -142,7 +145,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
-          _buildNavBarItem(Icons.search, 'Search', _selectedIndex == 1, 1),
+          _buildNavBarItem(Icons.chat, 'Chat', _selectedIndex == 1, 1), // Updated to Chat
           _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 2, 2),
         ],
       ),
@@ -228,6 +231,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         );
       },
       child: Container(
+        width: double.infinity, // Ensures it takes the full available width
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: const Color(0xFF2A2A2A),
@@ -269,6 +273,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       ),
     );
   }
+
 }
 
 class Job {

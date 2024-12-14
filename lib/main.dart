@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gighire/chat/chat_list.dart';
 import 'package:gighire/base_user/signup.dart';
+import 'package:gighire/chat/messaging.dart';
 import 'package:gighire/client/client_home.dart';
 import 'package:gighire/client/job_posting.dart';
 import 'package:gighire/worker/worker_home.dart';
@@ -45,6 +47,8 @@ class MyApp extends StatelessWidget {
         '/post_job': (context) => const JobPostingScreen(),
         '/worker_home': (context) => const WorkerHomeScreen(),
         '/worker_profile': (context) => const WorkerProfileScreen(),
+        '/chat_list': (context) => ChatListScreen(),
+        '/message': (context) => MessagingScreen(otherUserId: '',),
       },
     );
   }
