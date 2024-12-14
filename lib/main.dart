@@ -6,6 +6,7 @@ import 'package:gighire/base_user/signup.dart';
 import 'package:gighire/chat/messaging.dart';
 import 'package:gighire/client/client_home.dart';
 import 'package:gighire/client/job_posting.dart';
+import 'package:gighire/worker/job_details.dart';
 import 'package:gighire/worker/worker_home.dart';
 import 'package:gighire/worker/worker_profile.dart';
 import 'package:gighire/base_user/login.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         '/post_job': (context) => const JobPostingScreen(),
         '/worker_home': (context) => const WorkerHomeScreen(),
         '/worker_profile': (context) => const WorkerProfileScreen(),
+        '/job_details': (context) => const JobDetailsScreen(),
         '/chat_list': (context) => const ChatListScreen(),
         '/message': (context) => const MessagingScreen(),
       },

@@ -16,6 +16,17 @@ class _MessagingScreenState extends State<MessagingScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isSendingMessage = false;
 
+  late String otherUserId;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Retrieve `otherUserId` safely after the widget tree is built
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    otherUserId = args?['otherUserId'] ?? '';
+    print('Initialized with otherUserId: $otherUserId');
+  }
+
   // Ensure we have a valid current user before sending a message
   bool get _canSendMessage {
     return globalUserId != null &&
@@ -27,7 +38,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with ${widget.otherUserId}'),
+        title: Text('Chat with $otherUserId'),
       ),
       body: Column(
         children: [
@@ -64,21 +75,6 @@ class _MessagingScreenState extends State<MessagingScreen> {
     // Ensure globalUserId is not null before creating stream
     if (globalUserId == null) {
       return const Stream.empty();
-    }
-
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-    var otherUserId;
-
-    if (args != null) {
-      otherUserId = args['otherUserId'];  // Retrieve userId from arguments
-      print('Received userId: $otherUserId');  // Debugging line
-      for (var i = 1; i < 50; i++) {
-        print("messaging" + otherUserId);
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('args null, otherUserId null')),
-      );
     }
 
     return _firestore
@@ -151,17 +147,6 @@ class _MessagingScreenState extends State<MessagingScreen> {
     });
 
     try {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-      var otherUserId;
-      if (args != null) {
-        otherUserId = args['otherUserId'];  // Retrieve userId from arguments
-        print('Received userId: $otherUserId');  // Debugging line
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('args null, otherUserId null')),
-        );
-      }
-
       final message = _messageController.text.trim();
       final chatId = _getChatId(globalUserId!, otherUserId);
 
@@ -174,7 +159,7 @@ class _MessagingScreenState extends State<MessagingScreen> {
 
       // Update the chat metadata
       await _firestore.collection('messages').doc(chatId).set({
-        'participants': [globalUserId, widget.otherUserId],
+        'participants': [globalUserId, otherUserId],
         'lastMessage': message,
         'createdAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));

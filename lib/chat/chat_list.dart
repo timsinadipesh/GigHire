@@ -101,7 +101,7 @@ class ChatListScreen extends StatelessWidget {
           context,
           '/message',
           arguments: {
-            'chatId': chat.chatId,
+            // 'chatId': chat.chatId,
             'otherUserId': otherUserId,
           },
         );

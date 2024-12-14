@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:gighire/base_user/globals.dart';
-import 'package:gighire/chat/messaging.dart';
 
 class JobDetailsScreen extends StatefulWidget {
-  final String jobId;
+  final String? jobId;
 
-  const JobDetailsScreen({Key? key, required this.jobId}) : super(key: key);
+  const JobDetailsScreen({Key? key, this.jobId}) : super(key: key);
 
   @override
   _JobDetailsScreenState createState() => _JobDetailsScreenState();
@@ -28,13 +26,10 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
   Future<void> _fetchJobDetails() async {
     try {
-      DocumentSnapshot jobDoc = await _firestore
-          .collection('jobs')
-          .doc(widget.jobId)
-          .get();
+      DocumentSnapshot jobDoc = await _firestore.collection('jobs').doc(widget.jobId).get();
 
       if (jobDoc.exists) {
-        _jobDetails = jobDoc.data() as Map<String, dynamic>;
+        _jobDetails = jobDoc.data() as Map<String, dynamic>?;
         await _fetchPosterDetails(_jobDetails?['userId']);
         setState(() {
           _isLoading = false;
@@ -57,18 +52,15 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     if (userId == null) return;
 
     try {
-      DocumentSnapshot userDoc = await _firestore
-          .collection('clients')
-          .doc(userId)
-          .get();
+      DocumentSnapshot userDoc = await _firestore.collection('clients').doc(userId).get();
 
       if (userDoc.exists) {
-        _posterDetails = userDoc.data() as Map<String, dynamic>;
+        _posterDetails = userDoc.data() as Map<String, dynamic>?;
       } else {
         _posterDetails = {'fullName': 'Unknown'};
       }
     } catch (e) {
-      _posterDetails = {'name': 'Error fetching user'};
+      _posterDetails = {'fullName': 'Error fetching user'};
     }
   }
 
@@ -78,14 +70,14 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Text(
+        title: const Text(
           'Job Details',
           style: TextStyle(color: Color(0xFF4CAF50)),
         ),
-        iconTheme: IconThemeData(color: Color(0xFF4CAF50)),
+        iconTheme: const IconThemeData(color: Color(0xFF4CAF50)),
       ),
       body: _isLoading
-          ? Center(
+          ? const Center(
         child: CircularProgressIndicator(
           color: Color(0xFF4CAF50),
         ),
@@ -94,7 +86,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           ? Center(
         child: Text(
           _errorMessage,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
       )
           : SingleChildScrollView(
@@ -103,116 +95,19 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Job Title
-              Text(
-                _jobDetails?['jobTitle'] ?? 'No Title',
-                style: TextStyle(
-                  color: Color(0xFF4CAF50),
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 16.0),
-
-              // Job Details Grid
+              _buildJobTitle(),
+              const SizedBox(height: 16.0),
               _buildJobDetailsGrid(),
-
-              // Posted At
-              SizedBox(height: 16.0),
-              Text(
-                'Posted At: ${_jobDetails?['postedAt']?.toDate().toString() ?? 'Unknown'}',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16.0,
-                ),
-              ),
-
-              // Poster Details
-              SizedBox(height: 16.0),
-              Text(
-                'Posted By: ${_posterDetails?['fullName'] ?? 'Unknown'}',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16.0,
-                ),
-              ),
-
-              // Problem Description
-              SizedBox(height: 16.0),
-              Text(
-                'Problem Description',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8.0),
-              Text(
-                _jobDetails?['problemDescription'] ?? 'No description available',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16.0,
-                ),
-              ),
-
-              // Images Section
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
+              _buildPostedAt(),
+              const SizedBox(height: 16.0),
+              _buildPosterDetails(),
+              const SizedBox(height: 16.0),
+              _buildProblemDescription(),
+              const SizedBox(height: 16.0),
               _buildImagesSection(),
-
-              // Action Buttons
-              SizedBox(height: 24.0),
-              Center(
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: _applyForJob,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF4CAF50),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                            vertical: 16.0, horizontal: 32.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                      child: Text(
-                        'Apply for Job',
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    ),
-                    SizedBox(height: 16.0),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (globalUserId != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MessagingScreen(
-                                otherUserId: globalUserId!,
-                              ),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Unable to message the job poster.')),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF4CAF50),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                      ),
-                      child: Text(
-                        'Message Poster',
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 24.0),
+              _buildActionButtons(),
             ],
           ),
         ),
@@ -220,13 +115,24 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     );
   }
 
+  Widget _buildJobTitle() {
+    return Text(
+      _jobDetails?['jobTitle'] ?? 'No Title',
+      style: const TextStyle(
+        color: Color(0xFF4CAF50),
+        fontSize: 24.0,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
   Widget _buildJobDetailsGrid() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A2A),
+        color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(10.0),
       ),
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           _buildDetailRow('Location', _jobDetails?['location'] ?? 'Not specified'),
@@ -245,14 +151,14 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 16.0,
             ),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16.0,
               fontWeight: FontWeight.bold,
@@ -263,17 +169,63 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     );
   }
 
+  Widget _buildPostedAt() {
+    final postedAt = _jobDetails?['postedAt']?.toDate()?.toString() ?? 'Unknown';
+    return Text(
+      'Posted At: $postedAt',
+      style: const TextStyle(
+        color: Colors.white70,
+        fontSize: 16.0,
+      ),
+    );
+  }
+
+  Widget _buildPosterDetails() {
+    final posterName = _posterDetails?['fullName'] ?? 'Unknown';
+    return Text(
+      'Posted By: $posterName',
+      style: const TextStyle(
+        color: Colors.white70,
+        fontSize: 16.0,
+      ),
+    );
+  }
+
+  Widget _buildProblemDescription() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Problem Description',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8.0),
+        Text(
+          _jobDetails?['problemDescription'] ?? 'No description available',
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 16.0,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildImagesSection() {
     List<dynamic> images = _jobDetails?['images'] ?? [];
 
     if (images.isEmpty) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Problem Images',
           style: TextStyle(
             color: Colors.white,
@@ -281,7 +233,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -295,12 +247,12 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                     width: 150,
                     height: 150,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Center(
+                    placeholder: (context, url) => const Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFF4CAF50),
                       ),
                     ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
                   ),
                 ),
               );
@@ -311,12 +263,68 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     );
   }
 
+  Widget _buildActionButtons() {
+    return Center(
+      child: Column(
+        children: [
+          ElevatedButton(
+            onPressed: _applyForJob,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4CAF50),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+            ),
+            child: const Text(
+              'Apply for Job',
+              style: TextStyle(fontSize: 16.0),
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          ElevatedButton(
+            onPressed: _messagePoster,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4CAF50),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+            ),
+            child: const Text(
+              'Message Poster',
+              style: TextStyle(fontSize: 16.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _applyForJob() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Job application feature coming soon!'),
         backgroundColor: Color(0xFF4CAF50),
       ),
     );
+  }
+
+  void _messagePoster() {
+    final String? posterUserId = _jobDetails?['userId'];
+
+    if (posterUserId != null) {
+      Navigator.pushNamed(
+        context,
+        '/message',
+        arguments: {'otherUserId': posterUserId},
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to message the job poster.')),
+      );
+    }
   }
 }
