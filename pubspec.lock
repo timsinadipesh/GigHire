@@ -124,10 +124,10 @@ packages:
   esewa_flutter_sdk:
     dependency: "direct main"
     description:
-      path: esewa_flutter_sdk
+      path: "external_sdk/esewa_sdk/esewa_flutter_sdk"
       relative: true
     source: path
-    version: "2.4.0+17"
+    version: "2.0.1"
   fake_async:
     dependency: transitive
     description:

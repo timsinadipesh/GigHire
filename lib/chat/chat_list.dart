@@ -17,12 +17,12 @@ class ChatList extends StatelessWidget {
           "Chat",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.black87,
+        backgroundColor: Colors.grey[900],
         foregroundColor: Colors.green,
         elevation: 2,
       ),
       body: Container(
-        color: Colors.black87,
+        color: Colors.grey[900],
         child: _buildUserList(),
       ),
     );

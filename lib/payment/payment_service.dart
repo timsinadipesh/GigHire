@@ -10,7 +10,8 @@ class PaymentScreen extends StatelessWidget {
   const PaymentScreen({Key? key}) : super(key: key);
 
   // eSewa Test Credentials
-  static const String CLIENT_ID = 'JB0BBQ4aD0UqIThFJwAKBgAXEUkEGQUBBAwdOgABHD4DChwUAB0R';
+  static const String CLIENT_ID =
+      'JB0BBQ4aD0UqIThFJwAKBgAXEUkEGQUBBAwdOgABHD4DChwUAB0R';
   static const String SECRET_KEY = 'BhwIWQQADhIYSxILExMcAgFXFhcOBwAKBgAXEQ==';
 
   // Merchant credentials for verification (replace with your credentials)
@@ -22,7 +23,8 @@ class PaymentScreen extends StatelessWidget {
     try {
       EsewaFlutterSdk.initPayment(
         esewaConfig: EsewaConfig(
-          environment: Environment.test, // Change to Environment.live for production
+          environment:
+              Environment.test, // Change to Environment.live for production
           clientId: CLIENT_ID,
           secretId: SECRET_KEY,
         ),
@@ -37,7 +39,8 @@ class PaymentScreen extends StatelessWidget {
           );
 
           // Call verification function
-          verifyTransactionStatus(data.refId, context); // Verify using the transaction refId
+          verifyTransactionStatus(
+              data.refId, context); // Verify using the transaction refId
         },
         onPaymentFailure: (data) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -58,8 +61,10 @@ class PaymentScreen extends StatelessWidget {
   }
 
   // Transaction Verification Method
-  Future<void> verifyTransactionStatus(String refId, BuildContext context) async {
-    const String verificationUrl = 'https://rc.esewa.com.np/mobile/transaction?txnRefId='; // For production, remove 'rc'.
+  Future<void> verifyTransactionStatus(
+      String refId, BuildContext context) async {
+    const String verificationUrl =
+        'https://rc.esewa.com.np/mobile/transaction?txnRefId='; // For production, remove 'rc'.
 
     try {
       final response = await http.get(
@@ -77,17 +82,22 @@ class PaymentScreen extends StatelessWidget {
 
         if (transactionDetails['status'] == 'COMPLETE') {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Transaction Verified: ${transactionDetails['referenceId']}")),
+            SnackBar(
+                content: Text(
+                    "Transaction Verified: ${transactionDetails['referenceId']}")),
           );
           // TODO: Handle successful verification (e.g., update UI or backend)
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Transaction Not Complete: ${transactionDetails['status']}")),
+            SnackBar(
+                content: Text(
+                    "Transaction Not Complete: ${transactionDetails['status']}")),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Verification Failed: ${response.statusCode}")),
+          SnackBar(
+              content: Text("Verification Failed: ${response.statusCode}")),
         );
       }
     } catch (e) {
