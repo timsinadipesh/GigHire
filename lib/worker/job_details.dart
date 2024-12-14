@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gighire/base_user/globals.dart';
 import 'package:gighire/chat/messaging.dart';
 
 class JobDetailsScreen extends StatefulWidget {
@@ -183,13 +184,12 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                     SizedBox(height: 16.0),
                     ElevatedButton(
                       onPressed: () {
-                        final clientId = _jobDetails?['userId'];
-                        if (clientId != null) {
+                        if (globalUserId != null) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MessagingScreen(
-                                otherUserId: clientId,
+                                otherUserId: globalUserId!,
                               ),
                             ),
                           );

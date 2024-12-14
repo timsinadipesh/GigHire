@@ -47,8 +47,8 @@ class MyApp extends StatelessWidget {
         '/post_job': (context) => const JobPostingScreen(),
         '/worker_home': (context) => const WorkerHomeScreen(),
         '/worker_profile': (context) => const WorkerProfileScreen(),
-        '/chat_list': (context) => ChatListScreen(),
-        '/message': (context) => MessagingScreen(otherUserId: '',),
+        '/chat_list': (context) => const ChatListScreen(),
+        '/message': (context) => const MessagingScreen(),
       },
     );
   }

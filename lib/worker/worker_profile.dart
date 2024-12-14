@@ -27,12 +27,13 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     super.didChangeDependencies();
 
     // Retrieve userId from the arguments passed to the screen
-    final args = ModalRoute.of(context)?.settings.arguments as Map?;
+    // final args = ModalRoute.of(context)?.settings.arguments as Map?;
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
 
     if (args != null) {
       var userId = args['userId'];  // Retrieve userId from arguments
       print('Received userId: $userId');  // Debugging line
-      _fetchUserData(userId);  // Call your data fetching function
+      _fetchUserData(userId);
     } else {
       // If no arguments passed, assume we're fetching the logged-in user's profile
       var currentUser = FirebaseAuth.instance.currentUser;
@@ -314,8 +315,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            final args = ModalRoute.of(context)?.settings.arguments as Map?;
-                            var userId = args!['userId'];
+                            final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+                            var userId = args['userId'];
                             if (userId != null) {
                               Navigator.pushNamed(
                                 context,

@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 
 class MessagingScreen extends StatefulWidget {
-  final String otherUserId;
+  final String? otherUserId;
 
-  const MessagingScreen({Key? key, required this.otherUserId}) : super(key: key);
+  const MessagingScreen({Key? key, this.otherUserId}) : super(key: key);
 
   @override
   _MessagingScreenState createState() => _MessagingScreenState();
@@ -66,9 +66,24 @@ class _MessagingScreenState extends State<MessagingScreen> {
       return const Stream.empty();
     }
 
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    var otherUserId;
+
+    if (args != null) {
+      otherUserId = args['otherUserId'];  // Retrieve userId from arguments
+      print('Received userId: $otherUserId');  // Debugging line
+      for (var i = 1; i < 50; i++) {
+        print("messaging" + otherUserId);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('args null, otherUserId null')),
+      );
+    }
+
     return _firestore
         .collection('messages')
-        .doc(_getChatId(globalUserId!, widget.otherUserId))
+        .doc(_getChatId(globalUserId!, otherUserId))
         .collection('chats')
         .orderBy('timestamp', descending: true)
         .snapshots();
@@ -136,8 +151,19 @@ class _MessagingScreenState extends State<MessagingScreen> {
     });
 
     try {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+      var otherUserId;
+      if (args != null) {
+        otherUserId = args['otherUserId'];  // Retrieve userId from arguments
+        print('Received userId: $otherUserId');  // Debugging line
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('args null, otherUserId null')),
+        );
+      }
+
       final message = _messageController.text.trim();
-      final chatId = _getChatId(globalUserId!, widget.otherUserId);
+      final chatId = _getChatId(globalUserId!, otherUserId);
 
       // Add the message
       await _firestore.collection('messages').doc(chatId).collection('chats').add({
