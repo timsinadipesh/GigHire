@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
+import 'package:gighire/client/client_job_details.dart';
 import 'package:intl/intl.dart';
 
 class ClientJobsListScreen extends StatefulWidget {
@@ -87,115 +88,125 @@ class _ClientJobsListScreenState extends State<ClientJobsListScreen> {
   }
 
   Widget _buildJobCard(Map<String, dynamic> job) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Job title and location
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                job['jobTitle'] ?? 'No Title',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                job['location'] ?? 'No Location',
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-            ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ClientJobDetailsScreen(jobId: job['documentId']),
           ),
-          const SizedBox(height: 8),
-
-          // Problem description
-          Text(
-            job['problemDescription'] ?? 'No Description',
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Hourly pay and deadline
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Rs. ${job['hourlyPay'] ?? '0'}/hr',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                'Deadline: ${job['deadline'] ?? 'N/A'}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // PostedAt timestamp
-          Text(
-            'Posted At: ${job['postedAt'] != null ? DateFormat('hh:mm a, dd-MM-yyyy').format((job['postedAt'] as Timestamp).toDate()) : 'N/A'}',
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Images
-          if (job['images'] != null && job['images'] is List<dynamic> && job['images'].isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Job title and location
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Images:',
-                  style: TextStyle(
+                Text(
+                  job['jobTitle'] ?? 'No Title',
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
-                ...List<Widget>.from(
-                  (job['images'] as List<dynamic>).map(
-                        (imageUrl) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Image.network(
-                        imageUrl,
-                        height: 150,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                        const Text('Image failed to load', style: TextStyle(color: Colors.red)),
-                      ),
-                    ),
+                Text(
+                  job['location'] ?? 'No Location',
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
                   ),
                 ),
               ],
             ),
-        ],
+            const SizedBox(height: 8),
+
+            // Problem description
+            Text(
+              job['problemDescription'] ?? 'No Description',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Hourly pay and deadline
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Rs. ${job['hourlyPay'] ?? '0'}/hr',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  'Deadline: ${job['deadline'] ?? 'N/A'}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // PostedAt timestamp
+            Text(
+              'Posted At: ${job['postedAt'] != null ? DateFormat('hh:mm a, dd-MM-yyyy').format((job['postedAt'] as Timestamp).toDate()) : 'N/A'}',
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Images
+            if (job['images'] != null && job['images'] is List<dynamic> && job['images'].isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Images:',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...List<Widget>.from(
+                    (job['images'] as List<dynamic>).map(
+                          (imageUrl) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Image.network(
+                          imageUrl,
+                          height: 150,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                          const Text('Image failed to load', style: TextStyle(color: Colors.red)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }

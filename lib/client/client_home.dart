@@ -102,18 +102,13 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
             children: [
-              _buildServiceButton('Postings', 'postings'),
-              _buildServiceButton('In Progress', 'in_progress'),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildServiceButton('History', 'history'),
+              _buildServiceButton('Jobs Posted', Icons.assignment, 'postings'),
+              _buildServiceButton('Jobs in Progress', Icons.work, 'in_progress'),
+              _buildServiceButton('Completed Jobs', Icons.check_circle, 'history'),
             ],
           ),
         ],
@@ -121,23 +116,40 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     );
   }
 
-  Widget _buildServiceButton(String label, String statusFilter) {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ClientJobsListScreen(statusFilter: statusFilter),
+  Widget _buildServiceButton(String label, IconData icon, String statusFilter) {
+    return SizedBox(
+      width: (MediaQuery.of(context).size.width - 64) / 2, // Two buttons per row
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ClientJobsListScreen(statusFilter: statusFilter),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2A2A2A),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-        );
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF4CAF50), // Green color
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: const Color(0xFF4CAF50)),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

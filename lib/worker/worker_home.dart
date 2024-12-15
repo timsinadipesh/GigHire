@@ -70,11 +70,55 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     }
   }
 
+  // void _fetchRecentJobs() async {
+  //   try {
+  //     debugPrint('Fetching all recent jobs');
+  //
+  //     final jobsQuery = FirebaseFirestore.instance.collection('jobs').limit(10);
+  //     QuerySnapshot jobsSnapshot = await jobsQuery.get();
+  //
+  //     debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
+  //
+  //     if (jobsSnapshot.docs.isNotEmpty) {
+  //       List<Job> jobsList = [];
+  //       for (var doc in jobsSnapshot.docs) {
+  //         try {
+  //           debugPrint('Job Data: ${doc.data()}');
+  //           jobsList.add(Job.fromFirestore(doc));
+  //         } catch (e) {
+  //           debugPrint('Error parsing job document ${doc.id}: $e');
+  //         }
+  //       }
+  //       setState(() {
+  //         recentJobs = jobsList;
+  //       });
+  //     } else {
+  //       debugPrint('No jobs found');
+  //       if (mounted) {
+  //         setState(() {
+  //           recentJobs = [];
+  //         });
+  //       }
+  //     }
+  //   } catch (e) {
+  //     debugPrint("Error in _fetchRecentJobs: $e");
+  //     if (mounted) {
+  //       setState(() {
+  //         recentJobs = [];
+  //       });
+  //     }
+  //   }
+  // }
   void _fetchRecentJobs() async {
     try {
-      debugPrint('Fetching all recent jobs');
+      debugPrint('Fetching recent jobs with status "postings"');
 
-      final jobsQuery = FirebaseFirestore.instance.collection('jobs').limit(10);
+      // Add a condition to filter jobs with the status "postings"
+      final jobsQuery = FirebaseFirestore.instance
+          .collection('jobs')
+          .where('status', isEqualTo: 'postings') // Filter by status
+          .limit(10);
+
       QuerySnapshot jobsSnapshot = await jobsQuery.get();
 
       debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
@@ -93,7 +137,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           recentJobs = jobsList;
         });
       } else {
-        debugPrint('No jobs found');
+        debugPrint('No jobs found with status "postings"');
         if (mounted) {
           setState(() {
             recentJobs = [];
