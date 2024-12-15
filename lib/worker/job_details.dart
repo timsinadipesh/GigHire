@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gighire/client/client_profile.dart';
+import 'package:gighire/base_user/globals.dart';
 
 class JobDetailsScreen extends StatefulWidget {
   final String? jobId;
@@ -18,6 +19,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   Map<String, dynamic>? _posterDetails;
   bool _isLoading = true;
   String _errorMessage = '';
+  bool _hasApplied = false; // Track application state
 
   @override
   void initState() {
@@ -31,6 +33,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
       if (jobDoc.exists) {
         _jobDetails = jobDoc.data() as Map<String, dynamic>?;
+        // Check if the global user has applied
+        List<dynamic> applicants = _jobDetails?['applicants'] ?? [];
+        _hasApplied = applicants.contains(globalUserId); // Use globalUserId here
         await _fetchPosterDetails(_jobDetails?['userId']);
         setState(() {
           _isLoading = false;
@@ -62,6 +67,36 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       }
     } catch (e) {
       _posterDetails = {'fullName': 'Error fetching user'};
+    }
+  }
+
+  Future<void> _applyForJob() async {
+    if (_hasApplied) return; // Prevent multiple applications
+
+    try {
+      // Add the global user ID to the applicants array
+      await _firestore.collection('jobs').doc(widget.jobId).update({
+        'applicants': FieldValue.arrayUnion([globalUserId]), // Use globalUserId here
+      });
+
+      // Update the state to reflect the application
+      setState(() {
+        _hasApplied = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You have successfully applied for this job!'),
+          backgroundColor: Color(0xFF4CAF50),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to apply for the job: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -187,7 +222,6 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
     return Row(
       children: [
-        // Static "Posted By:" text
         const Text(
           'Posted By: ',
           style: TextStyle(
@@ -195,7 +229,6 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             fontSize: 16.0,
           ),
         ),
-        // Poster name as a button
         ElevatedButton(
           onPressed: () {
             if (posterUserId != null) {
@@ -212,16 +245,16 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF4CAF50), // Match existing button color
-            foregroundColor: Colors.white, // White text color
-            padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0), // Smaller padding
+            backgroundColor: const Color(0xFF4CAF50),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0), // Rounded shape
+              borderRadius: BorderRadius.circular(10.0),
             ),
           ),
           child: Text(
-            posterName, // Only the name inside the button
-            style: const TextStyle(fontSize: 14.0), // Slightly smaller font size
+            posterName,
+            style: const TextStyle(fontSize: 14.0),
           ),
         ),
       ],
@@ -276,20 +309,14 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           child: Row(
             children: images.map((imageUrl) {
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.0),
                   child: CachedNetworkImage(
                     imageUrl: imageUrl,
-                    width: 150,
-                    height: 150,
+                    height: 100.0,
+                    width: 100.0,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(
-                        color: Color(0xFF4CAF50),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
                   ),
                 ),
               );
@@ -305,18 +332,18 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       child: Column(
         children: [
           ElevatedButton(
-            onPressed: _applyForJob,
+            onPressed: _hasApplied ? null : _applyForJob, // Disable if already applied
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: _hasApplied ? Colors.yellow : const Color(0xFF4CAF50),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 32.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
             ),
-            child: const Text(
-              'Apply for Job',
-              style: TextStyle(fontSize: 16.0),
+            child: Text(
+              _hasApplied ? 'Applied' : 'Apply for Job',
+              style: const TextStyle(fontSize: 16.0),
             ),
           ),
           const SizedBox(height: 16.0),
@@ -336,15 +363,6 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _applyForJob() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Job application feature coming soon!'),
-        backgroundColor: Color(0xFF4CAF50),
       ),
     );
   }

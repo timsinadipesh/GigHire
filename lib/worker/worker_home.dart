@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 import 'package:gighire/worker/job_details.dart';
+import 'package:gighire/worker/worker_jobs_list.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({Key? key}) : super(key: key);
@@ -124,6 +125,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildServiceManagementSection(),
+                      const SizedBox(height: 16),
                       _buildRecentJobsSection(),
                     ],
                   ),
@@ -187,6 +190,70 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           fontFamily: 'Arial',
         ),
         textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildServiceManagementSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Service Management',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [
+            _buildServiceButton('Applied Jobs', Icons.assignment, 'postings'),
+            _buildServiceButton('Jobs in-progress', Icons.work, 'in_progress'),
+            _buildServiceButton('Completed Jobs', Icons.check_circle, 'history'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildServiceButton(String label, IconData icon, String statusFilter) {
+    return SizedBox(
+      width: (MediaQuery.of(context).size.width - 64) / 2, // Ensures two buttons per row
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2A2A2A),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WorkerJobsListScreen(statusFilter: statusFilter),
+            ),
+          );
+        },
+        child: Column(
+          children: [
+            Icon(icon, color: const Color(0xFF4CAF50)),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -273,7 +340,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       ),
     );
   }
-
 }
 
 class Job {
