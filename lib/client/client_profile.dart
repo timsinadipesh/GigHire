@@ -32,7 +32,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User ID not found')),
+        const SnackBar(content: Text('User ID not found')),
       );
       return;
     }
@@ -53,7 +53,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Client not found')),
+          const SnackBar(content: Text('Client not found')),
         );
       }
     } catch (e) {
@@ -91,14 +91,14 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Color(0xFF1a1a1a),
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     if (clientData.isEmpty) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Color(0xFF1a1a1a),
         body: Center(
           child: Text(
@@ -110,10 +110,10 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Color(0xFF1a1a1a),
+      backgroundColor: const Color(0xFF1a1a1a),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 16.0),
+          padding: const EdgeInsets.only(top: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -125,15 +125,15 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                       backgroundImage: clientData['profileImage'] != null
                           ? NetworkImage(clientData['profileImage'])
                           : null,
-                      backgroundColor: Color(0xFF333333),
+                      backgroundColor: const Color(0xFF333333),
                       child: clientData['profileImage'] == null
-                          ? Icon(Icons.person, color: Colors.white, size: 50)
+                          ? const Icon(Icons.person, color: Colors.white, size: 50)
                           : null,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       clientData['fullName'] ?? 'Unknown',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -166,34 +166,47 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 value: _formatDate(clientData['createdAt']),
               ),
 
-              // Logout Button at the bottom of the screen
-              if (_isOwnProfile)
-                const SizedBox(height: 40),
-                Center(
-                  child: SizedBox(
-                    width: 250,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _logout,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB71C1C),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+              // Conditionally show Logout or Message Now button
+              const SizedBox(height: 40),
+              Center(
+                child: SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isOwnProfile
+                        ? _logout // Logout for profile owner
+                        : () {
+                      if (widget.userId != null) {
+                        Navigator.pushNamed(
+                          context,
+                          '/message', // Route for messaging
+                          arguments: {'otherUserId': widget.userId}, // Pass profile userId
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Unable to message this user.')),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _isOwnProfile
+                          ? const Color(0xFFB71C1C) // Red for logout
+                          : const Color(0xFF4CAF50), // Green for "Message Now"
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                        'Logout',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    child: Text(
+                      _isOwnProfile ? 'Logout' : 'Message Now',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
+              ),
               const SizedBox(height: 40),
             ],
           ),
@@ -211,28 +224,28 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Color(0xFF2a2a2a),
+          color: const Color(0xFF2a2a2a),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
             Icon(icon, color: Colors.white, size: 24),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Color(0xFF888888),
                     fontSize: 12,
                   ),
                 ),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                   ),
@@ -250,7 +263,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.bold,

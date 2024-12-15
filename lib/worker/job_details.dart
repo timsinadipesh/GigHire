@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gighire/client/client_profile.dart';
 
 class JobDetailsScreen extends StatefulWidget {
   final String? jobId;
@@ -182,12 +183,48 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
   Widget _buildPosterDetails() {
     final posterName = _posterDetails?['fullName'] ?? 'Unknown';
-    return Text(
-      'Posted By: $posterName',
-      style: const TextStyle(
-        color: Colors.white70,
-        fontSize: 16.0,
-      ),
+    final posterUserId = _jobDetails?['userId']; // Retrieve the poster's userId
+
+    return Row(
+      children: [
+        // Static "Posted By:" text
+        const Text(
+          'Posted By: ',
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 16.0,
+          ),
+        ),
+        // Poster name as a button
+        ElevatedButton(
+          onPressed: () {
+            if (posterUserId != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ClientProfileScreen(userId: posterUserId),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('User profile not available.')),
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4CAF50), // Match existing button color
+            foregroundColor: Colors.white, // White text color
+            padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 12.0), // Smaller padding
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0), // Rounded shape
+            ),
+          ),
+          child: Text(
+            posterName, // Only the name inside the button
+            style: const TextStyle(fontSize: 14.0), // Slightly smaller font size
+          ),
+        ),
+      ],
     );
   }
 
