@@ -70,45 +70,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     }
   }
 
-  // void _fetchRecentJobs() async {
-  //   try {
-  //     debugPrint('Fetching all recent jobs');
-  //
-  //     final jobsQuery = FirebaseFirestore.instance.collection('jobs').limit(10);
-  //     QuerySnapshot jobsSnapshot = await jobsQuery.get();
-  //
-  //     debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
-  //
-  //     if (jobsSnapshot.docs.isNotEmpty) {
-  //       List<Job> jobsList = [];
-  //       for (var doc in jobsSnapshot.docs) {
-  //         try {
-  //           debugPrint('Job Data: ${doc.data()}');
-  //           jobsList.add(Job.fromFirestore(doc));
-  //         } catch (e) {
-  //           debugPrint('Error parsing job document ${doc.id}: $e');
-  //         }
-  //       }
-  //       setState(() {
-  //         recentJobs = jobsList;
-  //       });
-  //     } else {
-  //       debugPrint('No jobs found');
-  //       if (mounted) {
-  //         setState(() {
-  //           recentJobs = [];
-  //         });
-  //       }
-  //     }
-  //   } catch (e) {
-  //     debugPrint("Error in _fetchRecentJobs: $e");
-  //     if (mounted) {
-  //       setState(() {
-  //         recentJobs = [];
-  //       });
-  //     }
-  //   }
-  // }
   void _fetchRecentJobs() async {
     try {
       debugPrint('Fetching recent jobs with status "postings"');

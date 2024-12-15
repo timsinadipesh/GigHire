@@ -238,6 +238,45 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
   }
 
   Widget _buildApplicantsSection() {
+    String jobStatus = _jobDetails?['status'] ?? '';
+
+    if (jobStatus == 'history') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Assigned Worker',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          _buildAssignedWorker(),
+        ],
+      );
+    }
+
+    if (jobStatus == 'in_progress') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Assigned Worker',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          _buildAssignedWorker(showCompleteButton: true),
+        ],
+      );
+    }
+
+    // Default to showing all applicants (for "postings" status)
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -284,12 +323,13 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
                   // Update the job status to "in_progress"
                   await _firestore.collection('jobs').doc(widget.jobId).update({
                     'status': 'in_progress',
-                    'approvedApplicant': applicant['documentId'], // Example field
+                    'approvedApplicant': applicant['documentId'],
                   });
 
                   // Update local state to reflect the approval
                   setState(() {
                     applicant['status'] = 'approved';
+                    _jobDetails?['status'] = 'in_progress';
                   });
 
                   // Show a success message
@@ -317,6 +357,83 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
           );
         }).toList(),
       ],
+    );
+  }
+
+  Widget _buildAssignedWorker({bool showCompleteButton = false}) {
+    String? approvedApplicantId = _jobDetails?['approvedApplicant'];
+
+    if (approvedApplicantId == null) {
+      return const Text(
+        'No worker assigned yet.',
+        style: TextStyle(color: Colors.white70),
+      );
+    }
+
+    Map<String, dynamic>? assignedWorker = _applicants.firstWhere(
+          (applicant) => applicant['documentId'] == approvedApplicantId,
+      orElse: () => {},
+    );
+
+    if (assignedWorker.isEmpty) {
+      return const Text(
+        'Assigned worker details not found.',
+        style: TextStyle(color: Colors.white70),
+      );
+    }
+
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(assignedWorker['profileImage'] ?? ''),
+        child: assignedWorker['profileImage'] == null
+            ? const Icon(Icons.person, color: Colors.white)
+            : null,
+      ),
+      title: Text(
+        assignedWorker['fullName'] ?? 'Unknown',
+        style: const TextStyle(color: Colors.white),
+      ),
+      subtitle: Text(
+        assignedWorker['jobTitle'] ?? 'No profession specified',
+        style: const TextStyle(color: Colors.white70),
+      ),
+      trailing: showCompleteButton
+          ? ElevatedButton(
+        onPressed: () async {
+          try {
+            // Update the job status to "completed"
+            await _firestore.collection('jobs').doc(widget.jobId).update({
+              'status': 'completed',
+            });
+
+            // Update local state to reflect the completion
+            setState(() {
+              _jobDetails?['status'] = 'completed';
+            });
+
+            // Show a success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Job marked as completed'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } catch (e) {
+            // Show an error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to mark job as completed: ${e.toString()}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF4CAF50),
+        ),
+        child: const Text('Complete'),
+      )
+          : null,
     );
   }
 
