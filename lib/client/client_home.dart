@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'client_jobs_list.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({Key? key}) : super(key: key);
@@ -104,15 +105,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildServiceButton('Postings'),
-              _buildServiceButton('In Progress'),
+              _buildServiceButton('Postings', 'postings'),
+              _buildServiceButton('In Progress', 'in_progress'),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildServiceButton('History'),
+              _buildServiceButton('History', 'history'),
             ],
           ),
         ],
@@ -120,9 +121,16 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     );
   }
 
-  Widget _buildServiceButton(String label) {
+  Widget _buildServiceButton(String label, String statusFilter) {
     return ElevatedButton(
-      onPressed: () {}, // Placeholder for functionality
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ClientJobsListScreen(statusFilter: statusFilter),
+          ),
+        );
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF4CAF50), // Green color
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -303,22 +311,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        profession,
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 14,
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
                         ),
                       ),
                       Text(
@@ -329,6 +329,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    profession,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
