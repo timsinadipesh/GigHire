@@ -14,15 +14,15 @@ class WorkerSignupScreen extends StatefulWidget {
   final String password;
   final String? uploadedImageUrl;
 
-  const WorkerSignupScreen({
-    Key? key,
-    required this.fullName,
-    required this.email,
-    required this.phoneNumber,
-    required this.address,
-    required this.password,
-    this.uploadedImageUrl
-  }) : super(key: key);
+  const WorkerSignupScreen(
+      {Key? key,
+      required this.fullName,
+      required this.email,
+      required this.phoneNumber,
+      required this.address,
+      required this.password,
+      this.uploadedImageUrl})
+      : super(key: key);
 
   @override
   State<WorkerSignupScreen> createState() => _WorkerSignupScreenState();
@@ -35,7 +35,8 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
 
   final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _jobTitleController = TextEditingController();
-  final TextEditingController _workExperienceController = TextEditingController();
+  final TextEditingController _workExperienceController =
+      TextEditingController();
   final TextEditingController _hourlyRateController = TextEditingController();
 
   // Max limits
@@ -54,12 +55,14 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
 
         // Validate file exists
         if (!certImage.existsSync()) {
-          throw Exception("Certification image file does not exist at path: ${pickedFile.path}");
+          throw Exception(
+              "Certification image file does not exist at path: ${pickedFile.path}");
         }
 
         // Upload the image and store the URL
         try {
-          String? uploadedUrl = await _imageUploadService.uploadImageToImgur(certImage);
+          String? uploadedUrl =
+              await _imageUploadService.uploadImageToImgur(certImage);
 
           if (uploadedUrl != null) {
             setState(() {
@@ -76,7 +79,8 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maximum number of certifications reached')),
+        const SnackBar(
+            content: Text('Maximum number of certifications reached')),
       );
     }
   }
@@ -91,8 +95,10 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
 
   Future<void> _completeSignUp() async {
     // Validate job title is not empty
-    if (_jobTitleController.text.trim().isEmpty || _hourlyRateController.text.trim().isEmpty || //
-    _workExperienceController.text.trim().isEmpty || _aboutController.text.trim().isEmpty) {
+    if (_jobTitleController.text.trim().isEmpty ||
+        _hourlyRateController.text.trim().isEmpty || //
+        _workExperienceController.text.trim().isEmpty ||
+        _aboutController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all required fields.')),
       );
@@ -102,7 +108,8 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
     try {
       // Sign up user with Firebase Authentication
       UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: widget.email, password: widget.password);
+          .createUserWithEmailAndPassword(
+              email: widget.email, password: widget.password);
 
       // Get the user's UID
       String userId = userCredential.user?.uid ?? '';
@@ -112,7 +119,10 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
         // Primary skill (first TextField)
         skillControllers.isNotEmpty ? skillControllers[0].text : '',
         // Additional skills
-        ...skillControllers.skip(1).map((controller) => controller.text).toList()
+        ...skillControllers
+            .skip(1)
+            .map((controller) => controller.text)
+            .toList()
       ].where((skill) => skill.isNotEmpty).toList();
 
       List<String> certificationUrls = [];
@@ -172,9 +182,10 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4CAF50),
+        backgroundColor: Colors.grey[900],
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Worker Sign Up', style: TextStyle(color: Colors.white)),
+        title:
+            const Text('Worker Sign Up', style: TextStyle(color: Colors.white)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -280,7 +291,8 @@ class _WorkerSignupScreenState extends State<WorkerSignupScreen> {
                     GestureDetector(
                       onTap: _addSkillField,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 10),
                         decoration: BoxDecoration(
                           color: const Color(0xFF4CAF50),
                           borderRadius: BorderRadius.circular(10),

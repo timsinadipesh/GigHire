@@ -110,6 +110,15 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Profile",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.grey[900],
+        foregroundColor: Colors.green,
+        elevation: 2,
+      ),
       backgroundColor: Color(0xFF1a1a1a),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -167,33 +176,32 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               ),
 
               // Logout Button at the bottom of the screen
-              if (_isOwnProfile)
-                const SizedBox(height: 40),
-                Center(
-                  child: SizedBox(
-                    width: 250,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _logout,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB71C1C),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                        'Logout',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+              if (_isOwnProfile) const SizedBox(height: 40),
+              Center(
+                child: SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _logout,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB71C1C),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Logout',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
+              ),
               const SizedBox(height: 40),
             ],
           ),

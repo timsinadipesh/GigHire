@@ -62,13 +62,13 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           });
         });
         break;
-      case 4:
-        Navigator.pushNamed(context, '/esewa_screen').then((_) {
-          setState(() {
-            _selectedIndex = 0;
-          });
-        });
-        break;
+      // case 4:
+      //   Navigator.pushNamed(context, '/esewa_screen').then((_) {
+      //     setState(() {
+      //       _selectedIndex = 0;
+      //     });
+      //   });
+      //   break;
     }
   }
 
@@ -113,7 +113,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           _buildNavBarItem(Icons.post_add, 'Post Job', _selectedIndex == 1, 1),
           _buildNavBarItem(Icons.chat, 'chat', _selectedIndex == 2, 2),
           _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 3, 3),
-          _buildNavBarItem(Icons.payment, 'payment', _selectedIndex == 4, 4),
+          // _buildNavBarItem(Icons.payment, 'payment', _selectedIndex == 4, 4),
         ],
       ),
     );
@@ -175,7 +175,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search for services...',
+                hintText: 'Search service Provider',
                 hintStyle: TextStyle(color: Colors.grey[600]),
                 border: InputBorder.none,
               ),

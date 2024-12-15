@@ -30,9 +30,9 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     final args = ModalRoute.of(context)?.settings.arguments as Map?;
 
     if (args != null) {
-      var userId = args['userId'];  // Retrieve userId from arguments
-      print('Received userId: $userId');  // Debugging line
-      _fetchUserData(userId);  // Call your data fetching function
+      var userId = args['userId']; // Retrieve userId from arguments
+      print('Received userId: $userId'); // Debugging line
+      _fetchUserData(userId); // Call your data fetching function
     } else {
       // If no arguments passed, assume we're fetching the logged-in user's profile
       var currentUser = FirebaseAuth.instance.currentUser;
@@ -135,6 +135,15 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Profile",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.grey[900],
+        foregroundColor: Colors.green,
+        elevation: 2,
+      ),
       backgroundColor: Color(0xFF1a1a1a),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -175,13 +184,15 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 16.0),
                 child: Row(
                   children: [
                     // Rating Box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -205,7 +216,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     // Job Count Box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -231,13 +243,15 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
 
               // rate and experience row
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 16.0),
                 child: Row(
                   children: [
                     // Hourly Pricing Box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -262,7 +276,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     // Experience box
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 8.0),
                         decoration: BoxDecoration(
                           color: Color(0xFF2a2a2a),
                           borderRadius: BorderRadius.circular(10.0),
@@ -288,7 +303,8 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
 
               if (!_isOwnProfile)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -385,16 +401,18 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                   runSpacing: 8,
                   children: (userData['skills'] as List? ?? [])
                       .map((skill) => Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF2a2a2a),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Text(
-                      skill,
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ))
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF2a2a2a),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Text(
+                              skill,
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
+                            ),
+                          ))
                       .toList(),
                 ),
               ),
@@ -433,7 +451,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+              const SizedBox(height: 40),
             ],
           ),
         ),

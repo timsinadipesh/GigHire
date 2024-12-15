@@ -18,7 +18,8 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
   final ImageUploadService _imageUploadService = ImageUploadService();
 
   final TextEditingController _jobTitleController = TextEditingController();
-  final TextEditingController _problemDescriptionController = TextEditingController();
+  final TextEditingController _problemDescriptionController =
+      TextEditingController();
   final TextEditingController _hourlyPayController = TextEditingController();
   final TextEditingController _deadlineController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -46,12 +47,14 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
 
         // Validate file exists
         if (!certImage.existsSync()) {
-          throw Exception("Certification image file does not exist at path: ${pickedFile.path}");
+          throw Exception(
+              "Certification image file does not exist at path: ${pickedFile.path}");
         }
 
         // Upload the image and store the URL
         try {
-          String? uploadedUrl = await _imageUploadService.uploadImageToImgur(certImage);
+          String? uploadedUrl =
+              await _imageUploadService.uploadImageToImgur(certImage);
 
           if (uploadedUrl != null) {
             setState(() {
@@ -68,7 +71,8 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maximum number of certifications reached')),
+        const SnackBar(
+            content: Text('Maximum number of certifications reached')),
       );
     }
   }
@@ -76,13 +80,16 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
   Future<void> _loadUserLocation() async {
     try {
       // Fetch the user's location from the 'workers' collection
-      DocumentSnapshot userDoc = await _firestore.collection('clients').doc(globalUserId).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('clients').doc(globalUserId).get();
 
       if (userDoc.exists) {
-        String userAddress = userDoc['address'] ?? 'No address available';  // Use a default value if address is missing
+        String userAddress = userDoc['address'] ??
+            'No address available'; // Use a default value if address is missing
         setState(() {
           _userAddress = userAddress;
-          _locationController.text = userAddress;  // Prefill the location field with the user's address
+          _locationController.text =
+              userAddress; // Prefill the location field with the user's address
         });
       }
     } catch (e) {
@@ -102,7 +109,8 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
         _locationController.text = 'Remote';
         break;
       case 'custom':
-        _locationController.clear(); // Clear the location field for custom input
+        _locationController
+            .clear(); // Clear the location field for custom input
         break;
       default:
         break;
@@ -112,7 +120,12 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.grey[900],
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Post a Job', style: TextStyle(color: Colors.green)),
+      ),
+      backgroundColor: Color(0xFF1a1a1a),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -120,15 +133,15 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Post a Job',
-                  style: TextStyle(
-                    color: Color(0xFF4CAF50),
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                // Text(
+                //   'Post a Job',
+                //   style: TextStyle(
+                //     color: Color(0xFF4CAF50),
+                //     fontSize: 24.0,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                //   textAlign: TextAlign.center,
+                // ),
                 SizedBox(height: 16.0),
                 TextField(
                   controller: _jobTitleController,
@@ -167,8 +180,11 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(
-                            value == 'custom' ? 'Custom Location' :
-                            value == 'user_address' ? 'User Address' : 'Remote',
+                            value == 'custom'
+                                ? 'Custom Location'
+                                : value == 'user_address'
+                                    ? 'User Address'
+                                    : 'Remote',
                             style: TextStyle(color: Colors.white),
                           ),
                         );
@@ -188,7 +204,9 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                         ? 'Location (Your address)'
                         : 'Location',
                     hintStyle: TextStyle(color: Colors.grey),
-                    suffixText: _locationOption == 'user_address' ? '(Your address)' : null,
+                    suffixText: _locationOption == 'user_address'
+                        ? '(Your address)'
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                       borderSide: BorderSide(color: Colors.grey),
@@ -306,8 +324,9 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
                   ),
                   child: _isLoading
                       ? CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  )
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
                       : Text('Post Job'),
                 ),
               ],
@@ -322,14 +341,16 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
   Future<void> _selectDate() async {
     final DateTime currentDate = DateTime.now();
     final DateTime selectedDate = await showDatePicker(
-      context: context,
-      initialDate: currentDate,
-      firstDate: currentDate, // Allow future dates only
-      lastDate: DateTime(2101),
-    ) ?? currentDate;
+          context: context,
+          initialDate: currentDate,
+          firstDate: currentDate, // Allow future dates only
+          lastDate: DateTime(2101),
+        ) ??
+        currentDate;
 
     // Update the deadline field with the selected date
-    _deadlineController.text = "${selectedDate.toLocal()}".split(' ')[0]; // Format as YYYY-MM-DD
+    _deadlineController.text =
+        "${selectedDate.toLocal()}".split(' ')[0]; // Format as YYYY-MM-DD
   }
 
   Future<void> _postJob() async {
@@ -342,9 +363,13 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
     String problemDescription = _problemDescriptionController.text.trim();
     String hourlyPay = _hourlyPayController.text.trim();
     String deadline = _deadlineController.text.trim();
-    String location = _locationController.text.trim();  // Get the location
+    String location = _locationController.text.trim(); // Get the location
 
-    if (jobTitle.isEmpty || problemDescription.isEmpty || hourlyPay.isEmpty || deadline.isEmpty || location.isEmpty) {
+    if (jobTitle.isEmpty ||
+        problemDescription.isEmpty ||
+        hourlyPay.isEmpty ||
+        deadline.isEmpty ||
+        location.isEmpty) {
       setState(() {
         _isLoading = false;
         _errorMessage = 'Please fill in all the required fields.';
@@ -357,7 +382,8 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
 
       // Upload each selected image to Imgur and get the URL
       for (File image in _selectedImages) {
-        String? imgurImageUrl = await _imageUploadService.uploadImageToImgur(image);
+        String? imgurImageUrl =
+            await _imageUploadService.uploadImageToImgur(image);
         if (imgurImageUrl != null) {
           uploadedImageUrls.add(imgurImageUrl);
         }
@@ -369,9 +395,10 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
         'problemDescription': problemDescription,
         'hourlyPay': hourlyPay,
         'deadline': deadline,
-        'location': location,  // Store the location
-        'images': uploadedImageUrls,  // Store the uploaded image URLs
-        'postedAt': FieldValue.serverTimestamp(),  // Timestamp of when the job was posted
+        'location': location, // Store the location
+        'images': uploadedImageUrls, // Store the uploaded image URLs
+        'postedAt': FieldValue
+            .serverTimestamp(), // Timestamp of when the job was posted
         'userId': globalUserId,
       });
 
@@ -392,18 +419,18 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
       _problemDescriptionController.clear();
       _hourlyPayController.clear();
       _deadlineController.clear();
-      _locationController.clear();  // Clear location field
+      _locationController.clear(); // Clear location field
       setState(() {
-        _selectedImages.clear();  // Clear selected images
+        _selectedImages.clear(); // Clear selected images
       });
 
       Navigator.pushReplacementNamed(context, '/client_home');
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'An error occurred while posting the job. Please try again.';
+        _errorMessage =
+            'An error occurred while posting the job. Please try again.';
       });
     }
   }
 }
-
