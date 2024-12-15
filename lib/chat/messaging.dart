@@ -17,17 +17,50 @@ class _MessagingScreenState extends State<MessagingScreen> {
   bool _isSendingMessage = false;
 
   late String otherUserId;
+  String otherUserName = ""; // To store the name of the other participant
+
+  // 1. Declare the ScrollController
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Retrieve `otherUserId` safely after the widget tree is built
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     otherUserId = args?['otherUserId'] ?? '';
-    print('Initialized with otherUserId: $otherUserId');
+    _fetchOtherUserName(); // Fetch the full name of the other participant
   }
 
-  // Ensure we have a valid current user before sending a message
+  Future<void> _fetchOtherUserName() async {
+    try {
+      // Check clients collection first
+      DocumentSnapshot clientDoc = await _firestore.collection('clients').doc(otherUserId).get();
+      if (clientDoc.exists) {
+        setState(() {
+          otherUserName = clientDoc['fullName'];
+        });
+        return;
+      }
+
+      // Check workers collection
+      DocumentSnapshot workerDoc = await _firestore.collection('workers').doc(otherUserId).get();
+      if (workerDoc.exists) {
+        setState(() {
+          otherUserName = workerDoc['fullName'];
+        });
+        return;
+      }
+
+      // Default to user ID if no name is found
+      setState(() {
+        otherUserName = otherUserId;
+      });
+    } catch (e) {
+      setState(() {
+        otherUserName = "Unknown User";
+      });
+    }
+  }
+
   bool get _canSendMessage {
     return globalUserId != null &&
         _messageController.text.trim().isNotEmpty &&
@@ -37,8 +70,15 @@ class _MessagingScreenState extends State<MessagingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Chat with $otherUserId'),
+        backgroundColor: Colors.black,
+        title: Text(
+          otherUserName, // Display the full name of the other participant
+          style: const TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Column(
         children: [
@@ -51,15 +91,54 @@ class _MessagingScreenState extends State<MessagingScreen> {
                 }
 
                 final messages = snapshot.data!.docs;
+                DateTime? previousDate;
+
+                // 2. Scroll to the bottom when the messages are loaded
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_scrollController.hasClients) {
+                    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                  }
+                });
 
                 return ListView.builder(
-                  reverse: true,
+                  controller: _scrollController,  // 3. Attach the ScrollController
+                  reverse: false,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
-                    final isSentByUser = message['senderId'] == globalUserId;
+                    final timestamp = message['timestamp'] as Timestamp?;
+                    final messageDate = timestamp?.toDate();
 
-                    return _buildMessageBubble(message, isSentByUser);
+                    bool showDateHeader = false;
+                    if (messageDate != null) {
+                      if (previousDate == null ||
+                          messageDate.day != previousDate!.day ||
+                          messageDate.month != previousDate!.month ||
+                          messageDate.year != previousDate!.year) {
+                        showDateHeader = true;
+                        previousDate = messageDate;
+                      }
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (showDateHeader)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
+                            child: Center(
+                              child: Text(
+                                "${messageDate!.day} ${_getMonthName(messageDate.month)} ${messageDate.year}",
+                                style: const TextStyle(
+                                  color: Colors.white60,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        _buildMessageBubble(message, message['senderId'] == globalUserId),
+                      ],
+                    );
                   },
                 );
               },
@@ -72,7 +151,6 @@ class _MessagingScreenState extends State<MessagingScreen> {
   }
 
   Stream<QuerySnapshot> _getMessagesStream() {
-    // Ensure globalUserId is not null before creating stream
     if (globalUserId == null) {
       return const Stream.empty();
     }
@@ -81,27 +159,49 @@ class _MessagingScreenState extends State<MessagingScreen> {
         .collection('messages')
         .doc(_getChatId(globalUserId!, otherUserId))
         .collection('chats')
-        .orderBy('timestamp', descending: true)
+        .orderBy('timestamp', descending: false)
         .snapshots();
   }
 
   Widget _buildMessageBubble(DocumentSnapshot message, bool isSentByUser) {
-    return Align(
-      alignment: isSentByUser
-          ? Alignment.centerRight
-          : Alignment.centerLeft,
-      child: Container(
-        padding: const EdgeInsets.all(10.0),
-        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
-        decoration: BoxDecoration(
-          color: isSentByUser ? Colors.blue : Colors.grey,
-          borderRadius: BorderRadius.circular(10.0),
+    final timestamp = message['timestamp'] as Timestamp?;
+    final formattedTime = timestamp != null
+        ? TimeOfDay.fromDateTime(timestamp.toDate()).format(context)
+        : '...';
+
+    return Row(
+      mainAxisAlignment:
+      isSentByUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+      children: [
+        if (isSentByUser)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 10.0),
+            child: Text(
+              formattedTime,
+              style: const TextStyle(color: Colors.white60, fontSize: 10),
+            ),
+          ),
+        Container(
+          padding: const EdgeInsets.all(10.0),
+          margin: const EdgeInsets.symmetric(vertical: 5.0),
+          decoration: BoxDecoration(
+            color: isSentByUser ? Colors.green : Colors.grey[800],
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Text(
+            message['message'],
+            style: const TextStyle(color: Colors.white),
+          ),
         ),
-        child: Text(
-          message['message'],
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
+        if (!isSentByUser)
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0, left: 10.0),
+            child: Text(
+              formattedTime,
+              style: const TextStyle(color: Colors.white60, fontSize: 10),
+            ),
+          ),
+      ],
     );
   }
 
@@ -113,18 +213,29 @@ class _MessagingScreenState extends State<MessagingScreen> {
           Expanded(
             child: TextField(
               controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: 'Type a message',
-                border: OutlineInputBorder(),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Type a message...',
+                hintStyle: TextStyle(color: Colors.white60),
+                filled: true,
+                fillColor: Colors.grey[900],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
               ),
-              onChanged: (_) => setState(() {}), // Update send button state
+              onChanged: (_) => setState(() {}),
             ),
           ),
           const SizedBox(width: 8.0),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: _canSendMessage ? _sendMessage : null,
-            color: _canSendMessage ? Colors.blue : Colors.grey,
+          CircleAvatar(
+            backgroundColor: _canSendMessage ? Colors.green : Colors.grey,
+            radius: 24,
+            child: IconButton(
+              icon: const Icon(Icons.send, color: Colors.white),
+              onPressed: _canSendMessage ? _sendMessage : null,
+            ),
           ),
         ],
       ),
@@ -132,14 +243,11 @@ class _MessagingScreenState extends State<MessagingScreen> {
   }
 
   String _getChatId(String userId1, String userId2) {
-    // Ensure consistent chat ID creation
-    // Sort user IDs to create a consistent chat room
     final sortedIds = [userId1, userId2]..sort();
     return '${sortedIds[0]}-${sortedIds[1]}';
   }
 
   Future<void> _sendMessage() async {
-    // Additional null and state checks
     if (!_canSendMessage) return;
 
     setState(() {
@@ -150,31 +258,36 @@ class _MessagingScreenState extends State<MessagingScreen> {
       final message = _messageController.text.trim();
       final chatId = _getChatId(globalUserId!, otherUserId);
 
-      // Add the message
       await _firestore.collection('messages').doc(chatId).collection('chats').add({
         'message': message,
         'senderId': globalUserId,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // Update the chat metadata
       await _firestore.collection('messages').doc(chatId).set({
         'participants': [globalUserId, otherUserId],
         'lastMessage': message,
-        'createdAt': FieldValue.serverTimestamp(),
+        'lastMessageTime': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // Clear the message controller
       _messageController.clear();
     } catch (e) {
-      // Show an error to the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to send message: $e')),
+
       );
     } finally {
       setState(() {
         _isSendingMessage = false;
       });
     }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month];
   }
 }
