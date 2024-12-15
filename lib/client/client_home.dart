@@ -22,7 +22,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   Future<List<Map<String, dynamic>>> _fetchWorkers() async {
     final querySnapshot = await FirebaseFirestore.instance.collection('workers').get();
     return querySnapshot.docs.map((doc) {
-      // Include the documentId in the data
       var workerData = doc.data() as Map<String, dynamic>;
       workerData['documentId'] = doc.id; // Add documentId to the worker data
       return workerData;
@@ -36,10 +35,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
     switch (index) {
       case 0:
-      // Home
-        break;
+        break; // Home
       case 1:
-      // Post Job
         Navigator.pushNamed(context, '/post_job').then((_) {
           setState(() {
             _selectedIndex = 0;
@@ -47,7 +44,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         });
         break;
       case 2:
-      // Chat
         Navigator.pushNamed(context, '/chat_list').then((_) {
           setState(() {
             _selectedIndex = 0;
@@ -55,7 +51,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         });
         break;
       case 3:
-      // Profile
         Navigator.pushNamed(context, '/client_profile').then((_) {
           setState(() {
             _selectedIndex = 0;
@@ -74,54 +69,133 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           children: [
             _buildTitle(),
             Expanded(
-              child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: _workers,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: const Center(child: Text('Error loading workers')),
-                    );
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: const Center(child: Text('No workers found')),
-                    );
-                  }
-
-                  final workers = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: workers.length,
-                    itemBuilder: (context, index) {
-                      final worker = workers[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),  // Space between profiles
-                        child: _buildWorkerCard(
-                          context: context,
-                          name: worker['fullName'] ?? 'Unknown',
-                          profession: worker['jobTitle'] ?? 'N/A',
-                          rating: worker['rating']?.toString() ?? '0.0',
-                          reviews: worker['reviews']?.toString() ?? '0',
-                          address: worker['address'] ?? 'N/A',
-                          hourlyRate: worker['hourlyRate']?.toStringAsFixed(0) ?? 'N/A',
-                          workExperience: worker['workExperience'] ?? 'N/A',
-                          jobsCompleted: worker['jobsCompleted']?.toString() ?? '0',
-                          profileImageUrl: worker['profileImage'],  // Get profile image URL
-                          userId: worker['documentId'], // Pass the userId
-                        ),
-                      );
-                    },
-                  );
-                },
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildServiceManagementSection(),
+                    _buildPopularWorkersSection(),
+                  ],
+                ),
               ),
             ),
             _buildBottomNavBar(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildServiceManagementSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Service Management',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildServiceButton('Postings'),
+              _buildServiceButton('In Progress'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildServiceButton('History'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceButton(String label) {
+    return ElevatedButton(
+      onPressed: () {}, // Placeholder for functionality
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF4CAF50), // Green color
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+      ),
+    );
+  }
+
+  Widget _buildPopularWorkersSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Popular Workers',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: _workers,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: const Center(child: Text('Error loading workers')),
+                );
+              }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: const Center(child: Text('No workers found')),
+                );
+              }
+
+              final workers = snapshot.data!;
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: workers.length,
+                itemBuilder: (context, index) {
+                  final worker = workers[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: _buildWorkerCard(
+                      context: context,
+                      name: worker['fullName'] ?? 'Unknown',
+                      profession: worker['jobTitle'] ?? 'N/A',
+                      rating: worker['rating']?.toString() ?? '0.0',
+                      reviews: worker['reviews']?.toString() ?? '0',
+                      address: worker['address'] ?? 'N/A',
+                      hourlyRate: worker['hourlyRate']?.toStringAsFixed(0) ?? 'N/A',
+                      workExperience: worker['workExperience'] ?? 'N/A',
+                      jobsCompleted: worker['jobsCompleted']?.toString() ?? '0',
+                      profileImageUrl: worker['profileImage'],
+                      userId: worker['documentId'],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -135,7 +209,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         children: [
           _buildNavBarItem(Icons.home, 'Home', _selectedIndex == 0, 0),
           _buildNavBarItem(Icons.post_add, 'Post Job', _selectedIndex == 1, 1),
-          _buildNavBarItem(Icons.chat, 'Chat', _selectedIndex == 2, 2), // New Chat button
+          _buildNavBarItem(Icons.chat, 'Chat', _selectedIndex == 2, 2),
           _buildNavBarItem(Icons.person, 'Profile', _selectedIndex == 3, 3),
         ],
       ),
@@ -181,33 +255,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      height: 50,
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2A2A),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: Colors.grey[600]),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search for services...',
-                hintStyle: TextStyle(color: Colors.grey[600]),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildWorkerCard({
     required BuildContext context,
     required String name,
@@ -219,16 +266,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     required String workExperience,
     required String jobsCompleted,
     required String? profileImageUrl,
-    required String userId, // Add userId as a parameter
+    required String userId,
   }) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
           context,
-          '/worker_profile', // Ensure this route exists in your app
-          arguments: {
-            'userId': userId, // Pass the userId to the profile page
-          },
+          '/worker_profile',
+          arguments: {'userId': userId},
         );
       },
       child: Container(
@@ -239,7 +284,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         ),
         child: Row(
           children: [
-            // Worker profile image
             ClipOval(
               child: profileImageUrl != null && profileImageUrl.isNotEmpty
                   ? Image.network(
@@ -259,52 +303,28 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                        profession,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14,
                         ),
                       ),
                       Text(
                         address,
                         style: TextStyle(
                           color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            profession,
-                            style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '($workExperience yr)',  // Display work experience next to job title
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'Rs. $hourlyRate/hr',  // Display hourly rate at the far right
-                        style: const TextStyle(
-                          color: Colors.white,
                           fontSize: 14,
                         ),
                       ),
@@ -334,7 +354,27 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                       Text(
                         '$jobsCompleted jobs done',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),  // Brighter color
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '$workExperience yr experience',
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Rs. $hourlyRate/hr',
+                        style: const TextStyle(
+                          color: Colors.white,
                           fontSize: 14,
                         ),
                       ),
