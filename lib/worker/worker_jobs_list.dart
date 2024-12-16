@@ -79,7 +79,7 @@ class _WorkerJobsListScreenState extends State<WorkerJobsListScreen> {
         return 'Applied Jobs';
       case 'in_progress':
         return 'Jobs In Progress';
-      case 'history':
+      case 'complete':
         return 'Completed Jobs';
       default:
         return 'Jobs';

@@ -373,6 +373,7 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
         'images': uploadedImageUrls,  // Store the uploaded image URLs
         'postedAt': FieldValue.serverTimestamp(),  // Timestamp of when the job was posted
         'userId': globalUserId,
+        'status': 'postings',
       });
 
       // Show a success message

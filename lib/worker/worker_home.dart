@@ -72,14 +72,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
   void _fetchRecentJobs() async {
     try {
-      debugPrint('Fetching recent jobs with status "postings"');
+      debugPrint('Fetching all recent jobs');
 
-      // Add a condition to filter jobs with the status "postings"
-      final jobsQuery = FirebaseFirestore.instance
-          .collection('jobs')
-          .where('status', isEqualTo: 'postings') // Filter by status
-          .limit(10);
-
+      final jobsQuery = FirebaseFirestore.instance.collection('jobs').limit(10);
       QuerySnapshot jobsSnapshot = await jobsQuery.get();
 
       debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
@@ -98,7 +93,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           recentJobs = jobsList;
         });
       } else {
-        debugPrint('No jobs found with status "postings"');
+        debugPrint('No jobs found');
         if (mounted) {
           setState(() {
             recentJobs = [];
@@ -218,7 +213,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           children: [
             _buildServiceButton('Applied Jobs', Icons.assignment, 'postings'),
             _buildServiceButton('Jobs in-progress', Icons.work, 'in_progress'),
-            _buildServiceButton('Completed Jobs', Icons.check_circle, 'history'),
+            _buildServiceButton('Completed Jobs', Icons.check_circle, 'complete'),
           ],
         ),
       ],
