@@ -1,6 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gighire/base_user/globals.dart';
 
 class ClientJobDetailsScreen extends StatefulWidget {
@@ -30,20 +30,21 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
       DocumentSnapshot jobDoc = await _firestore.collection('jobs').doc(widget.jobId).get();
 
       if (jobDoc.exists) {
-        _jobDetails = jobDoc.data() as Map<String, dynamic>?;
-        await _fetchApplicants();
         setState(() {
-          _isLoading = false;
+          _jobDetails = jobDoc.data() as Map<String, dynamic>?;
         });
+        await _fetchApplicants();
       } else {
         setState(() {
           _errorMessage = 'Job not found';
-          _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to load job details: ${e.toString()}';
+        _errorMessage = 'Failed to load job details: $e';
+      });
+    } finally {
+      setState(() {
         _isLoading = false;
       });
     }
@@ -52,22 +53,113 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
   Future<void> _fetchApplicants() async {
     try {
       List<dynamic> applicantIds = _jobDetails?['applicants'] ?? [];
-
       if (applicantIds.isNotEmpty) {
         QuerySnapshot applicantDocs = await _firestore
             .collection('workers')
             .where(FieldPath.documentId, whereIn: applicantIds)
             .get();
 
-        _applicants = applicantDocs.docs.map((doc) {
-          var data = doc.data() as Map<String, dynamic>;
-          data['documentId'] = doc.id;
-          return data;
-        }).toList();
+        setState(() {
+          _applicants = applicantDocs.docs.map((doc) {
+            var data = doc.data() as Map<String, dynamic>;
+            data['documentId'] = doc.id;
+            return data;
+          }).toList();
+        });
       }
     } catch (e) {
-      _errorMessage = 'Failed to load applicants: ${e.toString()}';
+      setState(() {
+        _errorMessage = 'Failed to load applicants: $e';
+      });
     }
+  }
+
+  Future<void> _updateJobStatus(String newStatus) async {
+    try {
+      await _firestore.collection('jobs').doc(widget.jobId).update({'status': newStatus});
+      setState(() {
+        _jobDetails?['status'] = newStatus;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Job status updated to $newStatus'), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update job status: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Widget _buildApplicantsSection() {
+    String jobStatus = _jobDetails?['status'] ?? '';
+    if (jobStatus == 'completed') {
+      return const Text('This job has been completed.');
+    }
+    if (jobStatus == 'in_progress') {
+      return ElevatedButton(
+        onPressed: () => _showConfirmationDialog('Mark job as completed?', 'completed'),
+        child: const Text('Mark as Completed'),
+      );
+    }
+    // Default: show applicants
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Applicants', style: TextStyle(fontSize: 18, color: Colors.white)),
+        ..._applicants.map((applicant) {
+          return ListTile(
+            title: Text(applicant['fullName'] ?? 'Unknown', style: const TextStyle(color: Colors.white)),
+            subtitle: Text(applicant['jobTitle'] ?? 'No title', style: const TextStyle(color: Colors.grey)),
+            trailing: _jobDetails?['approvedApplicant'] == applicant['documentId']
+                ? const Text('Approved', style: TextStyle(color: Colors.green))
+                : ElevatedButton(
+              onPressed: () => _approveApplicant(applicant['documentId']),
+              child: const Text('Approve'),
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  Future<void> _approveApplicant(String applicantId) async {
+    try {
+      await _firestore.collection('jobs').doc(widget.jobId).update({
+        'status': 'in_progress',
+        'approvedApplicant': applicantId,
+      });
+      setState(() {
+        _jobDetails?['status'] = 'in_progress';
+        _jobDetails?['approvedApplicant'] = applicantId;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to approve applicant: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  void _showConfirmationDialog(String message, String newStatus) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmation'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _updateJobStatus(newStatus);
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -237,128 +329,6 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
     );
   }
 
-  Widget _buildApplicantsSection() {
-    String jobStatus = _jobDetails?['status'] ?? '';
-
-    if (jobStatus == 'history') {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Assigned Worker',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          _buildAssignedWorker(),
-        ],
-      );
-    }
-
-    if (jobStatus == 'in_progress') {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Assigned Worker',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          _buildAssignedWorker(showCompleteButton: true),
-        ],
-      );
-    }
-
-    // Default to showing all applicants (for "postings" status)
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Applicants',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8.0),
-        ..._applicants.map((applicant) {
-          bool isApproved = applicant['status'] == 'approved'; // Check approval status
-
-          return ListTile(
-            onTap: () {
-              global_from_client_jobs_posted_applicants = true;
-              Navigator.pushNamed(
-                context,
-                '/worker_profile',
-                arguments: {'userId': applicant['documentId']},
-              );
-            },
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(applicant['profileImage'] ?? ''),
-              child: applicant['profileImage'] == null
-                  ? const Icon(Icons.person, color: Colors.white)
-                  : null,
-            ),
-            title: Text(
-              applicant['fullName'] ?? 'Unknown',
-              style: const TextStyle(color: Colors.white),
-            ),
-            subtitle: Text(
-              applicant['jobTitle'] ?? 'No profession specified',
-              style: const TextStyle(color: Colors.white70),
-            ),
-            trailing: ElevatedButton(
-              onPressed: isApproved
-                  ? null // Disable button if already approved
-                  : () async {
-                try {
-                  // Update the job status to "in_progress"
-                  await _firestore.collection('jobs').doc(widget.jobId).update({
-                    'status': 'in_progress',
-                    'approvedApplicant': applicant['documentId'],
-                  });
-
-                  // Update local state to reflect the approval
-                  setState(() {
-                    applicant['status'] = 'approved';
-                    _jobDetails?['status'] = 'in_progress';
-                  });
-
-                  // Show a success message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${applicant['fullName']} approved'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } catch (e) {
-                  // Show an error message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to approve applicant: ${e.toString()}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isApproved ? Colors.grey : const Color(0xFF4CAF50),
-              ),
-              child: Text(isApproved ? 'Approved' : 'Approve'),
-            ),
-          );
-        }).toList(),
-      ],
-    );
-  }
 
   Widget _buildAssignedWorker({bool showCompleteButton = false}) {
     String? approvedApplicantId = _jobDetails?['approvedApplicant'];
@@ -436,5 +406,4 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
           : null,
     );
   }
-
 }

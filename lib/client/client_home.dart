@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'client_jobs_list.dart';
+import 'package:gighire/service_management/client_complete.dart';
+import 'package:gighire/service_management/client_in_progress.dart';
+import 'package:gighire/service_management/client_posts.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   const ClientHomeScreen({Key? key}) : super(key: key);
@@ -108,7 +110,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
             children: [
               _buildServiceButton('Jobs Posted', Icons.assignment, 'postings'),
               _buildServiceButton('Jobs in Progress', Icons.work, 'in_progress'),
-              _buildServiceButton('Completed Jobs', Icons.check_circle, 'history'),
+              _buildServiceButton('Completed Jobs', Icons.check_circle, 'completed'),
             ],
           ),
         ],
@@ -121,12 +123,28 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       width: (MediaQuery.of(context).size.width - 64) / 2, // Two buttons per row
       child: ElevatedButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ClientJobsListScreen(statusFilter: statusFilter),
-            ),
-          );
+          if (statusFilter == 'postings') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ClientPostsScreen(),
+              ),
+            );
+          } else if (statusFilter == 'in_progress') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ClientInProgressScreen(),
+              ),
+            );
+          } else if (statusFilter == 'completed') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ClientCompletedJobsScreen(),
+              ),
+            );
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2A2A2A),

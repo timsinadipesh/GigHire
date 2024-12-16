@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
+import 'package:gighire/service_management/worker_applied.dart';
 import 'package:gighire/worker/job_details.dart';
-import 'package:gighire/worker/worker_jobs_list.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({Key? key}) : super(key: key);
@@ -211,7 +211,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           spacing: 16,
           runSpacing: 16,
           children: [
-            _buildServiceButton('Applied Jobs', Icons.assignment, 'postings'),
+            // _buildServiceButton('Applied Jobs', Icons.assignment, 'postings'),
+            _buildServiceButton('Applied Jobs', Icons.assignment, 'applied_jobs'),
             _buildServiceButton('Jobs in-progress', Icons.work, 'in_progress'),
             _buildServiceButton('Completed Jobs', Icons.check_circle, 'complete'),
           ],
@@ -220,7 +221,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     );
   }
 
-  Widget _buildServiceButton(String label, IconData icon, String statusFilter) {
+  Widget _buildServiceButton(String label, IconData icon, String destination) {
     return SizedBox(
       width: (MediaQuery.of(context).size.width - 64) / 2, // Ensures two buttons per row
       child: ElevatedButton(
@@ -232,12 +233,16 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           ),
         ),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WorkerJobsListScreen(statusFilter: statusFilter),
-            ),
-          );
+          if (destination == 'applied_jobs') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const WorkerAppliedScreen(),
+              ),
+            );
+          } else {
+            // Handle other destinations as needed
+          }
         },
         child: Column(
           children: [
