@@ -80,7 +80,7 @@ class _ClientJobsListScreenState extends State<ClientJobsListScreen> {
         return 'My Job Postings';
       case 'in_progress':
         return 'Jobs In Progress';
-      case 'history':
+      case 'complete':
         return 'Job History';
       default:
         return 'Jobs';
