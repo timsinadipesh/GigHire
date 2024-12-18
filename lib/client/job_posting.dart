@@ -342,14 +342,20 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
     String problemDescription = _problemDescriptionController.text.trim();
     String hourlyPay = _hourlyPayController.text.trim();
     String deadline = _deadlineController.text.trim();
-    String location = _locationController.text.trim();  // Get the location
+    String location = _locationController.text.trim();
 
-    if (jobTitle.isEmpty || problemDescription.isEmpty || hourlyPay.isEmpty || deadline.isEmpty || location.isEmpty) {
+    // Validate required fields
+    if (jobTitle.isEmpty || hourlyPay.isEmpty || deadline.isEmpty || location.isEmpty) {
       setState(() {
         _isLoading = false;
         _errorMessage = 'Please fill in all the required fields.';
       });
       return;
+    }
+
+    // Provide default values for optional fields
+    if (problemDescription.isEmpty) {
+      problemDescription = 'No description provided.';
     }
 
     try {
@@ -369,33 +375,32 @@ class _JobPostingScreenState extends State<JobPostingScreen> {
         'problemDescription': problemDescription,
         'hourlyPay': hourlyPay,
         'deadline': deadline,
-        'location': location,  // Store the location
-        'images': uploadedImageUrls,  // Store the uploaded image URLs
+        'location': location,
+        'images': uploadedImageUrls.isNotEmpty ? uploadedImageUrls : [], // Default to empty list if no images
         'postedAt': FieldValue.serverTimestamp(),  // Timestamp of when the job was posted
         'userId': globalUserId,
-        'status': 'postings',
+        'status': 'postings', // Default job status
       });
 
-      // Show a success message
+      // Show success message
       setState(() {
         _isLoading = false;
         _errorMessage = '';
       });
 
-      // Show a success snack bar
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Job posted successfully!'),
         backgroundColor: Colors.green,
       ));
 
-      // Clear the form after posting
+      // Clear the form
       _jobTitleController.clear();
       _problemDescriptionController.clear();
       _hourlyPayController.clear();
       _deadlineController.clear();
-      _locationController.clear();  // Clear location field
+      _locationController.clear();
       setState(() {
-        _selectedImages.clear();  // Clear selected images
+        _selectedImages.clear();
       });
 
       Navigator.pushReplacementNamed(context, '/client_home');
