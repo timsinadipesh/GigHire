@@ -3,28 +3,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 import 'package:gighire/worker/job_details.dart';
 
-class WorkerAppliedScreen extends StatefulWidget {
-  const WorkerAppliedScreen({Key? key}) : super(key: key);
+class WorkerCompleteScreen extends StatefulWidget {
+  const WorkerCompleteScreen({Key? key}) : super(key: key);
 
   @override
-  _WorkerAppliedScreenState createState() => _WorkerAppliedScreenState();
+  _WorkerCompleteScreenState createState() => _WorkerCompleteScreenState();
 }
 
-class _WorkerAppliedScreenState extends State<WorkerAppliedScreen> {
-  List<Job> appliedJobs = [];
+class _WorkerCompleteScreenState extends State<WorkerCompleteScreen> {
+  List<Job> completedJobs = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchAppliedJobs();
+    _fetchCompletedJobs();
   }
 
-  void _fetchAppliedJobs() async {
+  void _fetchCompletedJobs() async {
     try {
-      debugPrint('Fetching jobs the worker has applied for');
+      debugPrint('Fetching jobs with status "completed" where the worker has applied');
 
-      final jobsQuery = FirebaseFirestore.instance.collection('jobs')
-          .where('status', isEqualTo: 'postings'); // Filter by status "postings"
+      final jobsQuery = FirebaseFirestore.instance
+          .collection('jobs')
+          .where('status', isEqualTo: 'completed'); // Filter by status "completed"
+
       QuerySnapshot jobsSnapshot = await jobsQuery.get();
 
       debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
@@ -42,12 +44,12 @@ class _WorkerAppliedScreenState extends State<WorkerAppliedScreen> {
       }
 
       setState(() {
-        appliedJobs = jobsList;
+        completedJobs = jobsList;
       });
     } catch (e) {
-      debugPrint("Error in _fetchAppliedJobs: $e");
+      debugPrint("Error in _fetchCompletedJobs: $e");
       setState(() {
-        appliedJobs = [];
+        completedJobs = [];
       });
     }
   }
@@ -57,25 +59,25 @@ class _WorkerAppliedScreenState extends State<WorkerAppliedScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text('Applied Jobs'),
+        title: const Text('Completed Jobs'),
         backgroundColor: const Color(0xFF2A2A2A),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: appliedJobs.isEmpty
+          child: completedJobs.isEmpty
               ? const Center(
             child: Text(
-              'You haven\'t applied for any jobs yet.',
+              'You haven\'t completed any jobs yet.',
               style: TextStyle(color: Colors.white),
             ),
           )
               : ListView.builder(
-            itemCount: appliedJobs.length,
+            itemCount: completedJobs.length,
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: _buildJobCard(appliedJobs[index]),
+                child: _buildJobCard(completedJobs[index]),
               );
             },
           ),

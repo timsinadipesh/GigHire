@@ -3,28 +3,30 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 import 'package:gighire/worker/job_details.dart';
 
-class WorkerAppliedScreen extends StatefulWidget {
-  const WorkerAppliedScreen({Key? key}) : super(key: key);
+class WorkerInProgressScreen extends StatefulWidget {
+  const WorkerInProgressScreen({Key? key}) : super(key: key);
 
   @override
-  _WorkerAppliedScreenState createState() => _WorkerAppliedScreenState();
+  _WorkerInProgressScreenState createState() => _WorkerInProgressScreenState();
 }
 
-class _WorkerAppliedScreenState extends State<WorkerAppliedScreen> {
-  List<Job> appliedJobs = [];
+class _WorkerInProgressScreenState extends State<WorkerInProgressScreen> {
+  List<Job> inProgressJobs = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchAppliedJobs();
+    _fetchInProgressJobs();
   }
 
-  void _fetchAppliedJobs() async {
+  void _fetchInProgressJobs() async {
     try {
-      debugPrint('Fetching jobs the worker has applied for');
+      debugPrint('Fetching jobs with status "in_progress" where the worker has applied');
 
-      final jobsQuery = FirebaseFirestore.instance.collection('jobs')
-          .where('status', isEqualTo: 'postings'); // Filter by status "postings"
+      final jobsQuery = FirebaseFirestore.instance
+          .collection('jobs')
+          .where('status', isEqualTo: 'in_progress'); // Filter by status "in_progress"
+
       QuerySnapshot jobsSnapshot = await jobsQuery.get();
 
       debugPrint('Jobs query returned ${jobsSnapshot.docs.length} results.');
@@ -42,12 +44,12 @@ class _WorkerAppliedScreenState extends State<WorkerAppliedScreen> {
       }
 
       setState(() {
-        appliedJobs = jobsList;
+        inProgressJobs = jobsList;
       });
     } catch (e) {
-      debugPrint("Error in _fetchAppliedJobs: $e");
+      debugPrint("Error in _fetchInProgressJobs: $e");
       setState(() {
-        appliedJobs = [];
+        inProgressJobs = [];
       });
     }
   }
@@ -57,25 +59,25 @@ class _WorkerAppliedScreenState extends State<WorkerAppliedScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text('Applied Jobs'),
+        title: const Text('In-Progress Jobs'),
         backgroundColor: const Color(0xFF2A2A2A),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: appliedJobs.isEmpty
+          child: inProgressJobs.isEmpty
               ? const Center(
             child: Text(
-              'You haven\'t applied for any jobs yet.',
+              'You don\'t have any in-progress jobs.',
               style: TextStyle(color: Colors.white),
             ),
           )
               : ListView.builder(
-            itemCount: appliedJobs.length,
+            itemCount: inProgressJobs.length,
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: _buildJobCard(appliedJobs[index]),
+                child: _buildJobCard(inProgressJobs[index]),
               );
             },
           ),

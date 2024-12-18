@@ -24,7 +24,7 @@ class _ClientCompletedJobsScreenState extends State<ClientCompletedJobsScreen> {
       final jobsQuery = FirebaseFirestore.instance
           .collection('jobs')
           .where('userId', isEqualTo: globalUserId) // Filter by client ID
-          .where('status', isEqualTo: 'complete'); // Filter by "complete" status
+          .where('status', isEqualTo: 'completed'); // Filter by "complete" status
 
       QuerySnapshot jobsSnapshot = await jobsQuery.get();
       List<Job> jobsList = jobsSnapshot.docs.map((doc) {
@@ -109,7 +109,7 @@ class _ClientCompletedJobsScreenState extends State<ClientCompletedJobsScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Hourly Pay: \$${job.hourlyPay}',
+              'Hourly Pay: Rs.${job.hourlyPay}',
               style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 4),

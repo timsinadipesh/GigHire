@@ -23,7 +23,8 @@ class _ClientPostsScreenState extends State<ClientPostsScreen> {
     try {
       final jobsQuery = FirebaseFirestore.instance
           .collection('jobs')
-          .where('userId', isEqualTo: globalUserId); // Filter by client ID
+          .where('userId', isEqualTo: globalUserId) // Filter by client ID
+          .where('status', isEqualTo: 'postings'); // Filter by status "postings"
 
       QuerySnapshot jobsSnapshot = await jobsQuery.get();
       List<Job> jobsList = jobsSnapshot.docs.map((doc) {
@@ -108,7 +109,7 @@ class _ClientPostsScreenState extends State<ClientPostsScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Hourly Pay: \$${job.hourlyPay}',
+              'Hourly Pay: Rs.${job.hourlyPay}',
               style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 4),

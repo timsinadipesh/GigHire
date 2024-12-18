@@ -109,7 +109,7 @@ class _ClientInProgressScreenState extends State<ClientInProgressScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Hourly Pay: \$${job.hourlyPay}',
+              'Hourly Pay: Rs.${job.hourlyPay}',
               style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 4),

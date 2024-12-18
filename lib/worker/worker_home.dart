@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gighire/base_user/globals.dart';
 import 'package:gighire/service_management/worker_applied.dart';
+import 'package:gighire/service_management/worker_complete.dart';
+import 'package:gighire/service_management/worker_in_progress.dart';
 import 'package:gighire/worker/job_details.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
@@ -240,8 +242,20 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                 builder: (context) => const WorkerAppliedScreen(),
               ),
             );
-          } else {
-            // Handle other destinations as needed
+          } else if (destination == 'in_progress') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const WorkerInProgressScreen(),
+              ),
+            );
+          } else if (destination == 'complete') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const WorkerCompleteScreen(),
+              ),
+            );
           }
         },
         child: Column(
