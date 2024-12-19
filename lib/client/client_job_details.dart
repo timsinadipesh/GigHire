@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gighire/worker/worker_profile.dart';
 
 class ClientJobDetailsScreen extends StatefulWidget {
   final String jobId;
@@ -101,7 +102,7 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
             style: TextStyle(color: Colors.white, fontSize: 16),
           ),
           const SizedBox(height: 16),
-          _buildAssignedWorker(), // Display the assigned worker
+          _buildAssignedWorker(),
         ],
       );
     }
@@ -115,12 +116,11 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
             style: TextStyle(color: Colors.white, fontSize: 16),
           ),
           const SizedBox(height: 16),
-          _buildAssignedWorker(showCompleteButton: true), // Allow completion & review
+          _buildAssignedWorker(showCompleteButton: true),
         ],
       );
     }
 
-    // Default: Show applicants and allow approval if the job has not started
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -129,6 +129,16 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
           return ListTile(
             title: Text(applicant['fullName'] ?? 'Unknown', style: const TextStyle(color: Colors.white)),
             subtitle: Text(applicant['jobTitle'] ?? 'No title', style: const TextStyle(color: Colors.grey)),
+            onTap: () {
+              // Navigate to the WorkerProfileScreen with the document ID as the userId
+              print('Navigating to worker profile with ID: ${applicant['documentId']}');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WorkerProfileScreen(userId: applicant['documentId']),
+                ),
+              );
+            },
             trailing: _jobDetails?['approvedApplicant'] == applicant['documentId']
                 ? const Text('Approved', style: TextStyle(color: Colors.green))
                 : ElevatedButton(
@@ -140,6 +150,7 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
       ],
     );
   }
+
 
   Future<void> _approveApplicant(String applicantId) async {
     try {
@@ -273,7 +284,8 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
       );
     }
 
-    bool canRate = _jobDetails?['status'] == 'completed' && !_jobDetails?['clientRated'];
+    bool canRate = _jobDetails?['status'] == 'completed' &&
+        !_jobDetails?['clientRated'];
     bool showButton = canRate || showCompleteButton;
 
     return ListTile(
@@ -308,6 +320,16 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
         child: Text(canRate ? 'Rate & Review' : 'Complete'),
       )
           : null,
+      onTap: () {
+        // Navigate to worker profile when tapping the tile
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                WorkerProfileScreen(userId: approvedApplicantId),
+          ),
+        );
+      },
     );
   }
 

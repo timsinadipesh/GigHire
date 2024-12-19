@@ -76,7 +76,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     try {
       // Add the global user ID to the applicants array
       await _firestore.collection('jobs').doc(widget.jobId).update({
-        'applicants': FieldValue.arrayUnion([globalUserId]), // Use globalUserId here
+        'applicants': FieldValue.arrayUnion([globalUserId]),
       });
 
       // Update the state to reflect the application
