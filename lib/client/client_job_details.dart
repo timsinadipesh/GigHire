@@ -208,6 +208,49 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
     }
   }
 
+  Future<void> _markAsComplete(String workerId) async {
+    try {
+      final jobRef = _firestore.collection('jobs').doc(widget.jobId);
+      final workerRef = _firestore.collection('workers').doc(workerId);
+
+      // Retrieve existing worker data
+      DocumentSnapshot workerSnapshot = await workerRef.get();
+      Map<String, dynamic>? workerData = workerSnapshot.data() as Map<String, dynamic>?;
+
+      // Increment the worker's job count
+      int updatedJobCount = (workerData?['jobCount'] ?? 0) + 1;
+
+      // Update the worker document
+      await workerRef.update({
+        'jobCount': updatedJobCount,
+      });
+
+      // Update the job status to 'completed'
+      await jobRef.update({
+        'status': 'completed',
+        'completionDate': FieldValue.serverTimestamp(), // Capture completion timestamp
+      });
+
+      setState(() {
+        _jobDetails?['status'] = 'completed';
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Job marked as completed!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to mark job as complete: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Widget _buildAssignedWorker({bool showCompleteButton = false}) {
     String? approvedApplicantId = _jobDetails?['approvedApplicant'];
 
@@ -250,11 +293,19 @@ class _ClientJobDetailsScreenState extends State<ClientJobDetailsScreen> {
       ),
       trailing: showButton
           ? ElevatedButton(
-        onPressed: () => _showReviewDialog(approvedApplicantId),
+        onPressed: () async {
+          if (!canRate) {
+            // Mark the job as complete without review
+            await _markAsComplete(approvedApplicantId);
+          } else {
+            // Show the review dialog
+            _showReviewDialog(approvedApplicantId);
+          }
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4CAF50),
         ),
-        child: Text(canRate ? 'Rate & Review' : 'Complete & Review'),
+        child: Text(canRate ? 'Rate & Review' : 'Complete'),
       )
           : null,
     );

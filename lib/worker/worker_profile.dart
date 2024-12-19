@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class WorkerProfileScreen extends StatefulWidget {
-  final String? userId; // Accept userId as a parameter
+  final String? userId;
 
   const WorkerProfileScreen({Key? key, this.userId}) : super(key: key);
 
@@ -16,50 +16,46 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
   Map<String, dynamic> userData = {};
   bool _isLoading = true;
   bool _isOwnProfile = false;
+  List<Map<String, dynamic>> reviews = [];
 
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    // Retrieve userId from the arguments passed to the screen
-    // final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-
-    if (args != null) {
-      var userId = args['userId'];  // Retrieve userId from arguments
-      print('Received userId: $userId');  // Debugging line
-      _fetchUserData(userId);
-    } else {
-      // If no arguments passed, assume we're fetching the logged-in user's profile
-      var currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        _fetchUserData(currentUser.uid);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final userId = args != null ? args['userId'] : FirebaseAuth.instance.currentUser?.uid;
+      if (userId != null) {
+        _fetchUserData(userId);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('User not logged in')),
+          SnackBar(content: Text('User ID not found')),
         );
+        setState(() {
+          _isLoading = false;
+        });
       }
+    });
+  }
+
+  Future<int> _countReviews(String userId) async {
+    try {
+      final jobsSnapshot = await FirebaseFirestore.instance
+          .collection('jobs')
+          .where('approvedApplicant', isEqualTo: userId)
+          .where('clientRated', isEqualTo: true)
+          .get();
+
+      return jobsSnapshot.docs.length;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error counting reviews: $e')),
+      );
+      return 0;
     }
   }
 
-  Future<void> _fetchUserData(String? userId) async {
-    print('Fetching user data for userId: $userId'); // Debugging line
+  Future<void> _fetchUserData(String userId) async {
     _isOwnProfile = (userId == FirebaseAuth.instance.currentUser?.uid);
-
-    if (userId == null) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User ID not found')),
-      );
-      return;
-    }
 
     try {
       final docSnapshot = await FirebaseFirestore.instance
@@ -67,12 +63,11 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           .doc(userId)
           .get();
 
-      print('Document exists: ${docSnapshot.exists}');
-      print('Document data: ${docSnapshot.data()}');
-
       if (docSnapshot.exists) {
+        final count = await _countReviews(userId);
         setState(() {
           userData = docSnapshot.data() ?? {};
+          userData['reviewCount'] = count; // Add review count to userData
           _isLoading = false;
         });
       } else {
@@ -114,6 +109,61 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
     }
   }
 
+  Future<void> _fetchReviews(String userId) async {
+    try {
+      final jobsSnapshot = await FirebaseFirestore.instance
+          .collection('jobs')
+          .where('approvedApplicant', isEqualTo: userId)
+          .where('clientRated', isEqualTo: true)
+          .get();
+
+      final fetchedReviews = jobsSnapshot.docs.map((doc) {
+        return {
+          'review': doc.data()['review'] ?? '',
+          'rating': doc.data()['rating'] ?? 0,
+        };
+      }).toList();
+
+      setState(() {
+        reviews = fetchedReviews;
+      });
+
+      _showReviewsDialog();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching reviews: $e')),
+      );
+    }
+  }
+
+  void _showReviewsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Reviews'),
+          content: reviews.isEmpty
+              ? Text('No reviews available.')
+              : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: reviews.map((review) {
+              return ListTile(
+                title: Text(review['review']),
+                subtitle: Text('Rating: ${review['rating']}'),
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -134,6 +184,9 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
         ),
       );
     }
+
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final userId = args != null ? args['userId'] : FirebaseAuth.instance.currentUser?.uid;
 
     return Scaffold(
       backgroundColor: Color(0xFF1a1a1a),
@@ -191,7 +244,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Rating:  ${(userData['rating'] ?? 0.0).toStringAsFixed(1)}/5',
+                              'Rating: ${(userData['totalRating'] != null ? (userData['totalRating'] / 5).toStringAsFixed(1) : '0.0')}/5',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
@@ -215,7 +268,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Job count:  ${userData['job_count'] ?? 0}',
+                              'Job count:  ${userData['jobCount'] ?? 0}',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.bold,
@@ -284,6 +337,35 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (userId != null) {
+                        _fetchReviews(userId);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('User ID is null')),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF4CAF50),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      minimumSize: Size(200, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      '${userData['reviewCount'] ?? 0} Reviews',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
                 ),
               ),
 

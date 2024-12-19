@@ -368,36 +368,36 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                       fontSize: 14,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            color: Color(0xFF4CAF50),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$rating ($reviews reviews)',
-                            style: const TextStyle(
-                              color: Color(0xFF4CAF50),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '$jobsCompleted jobs done',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // const SizedBox(height: 4),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     Row(
+                  //       children: [
+                  //         const Icon(
+                  //           Icons.star,
+                  //           color: Color(0xFF4CAF50),
+                  //           size: 16,
+                  //         ),
+                  //         const SizedBox(width: 4),
+                  //         Text(
+                  //           '$rating ($reviews reviews)',
+                  //           style: const TextStyle(
+                  //             color: Color(0xFF4CAF50),
+                  //             fontSize: 14,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //     Text(
+                  //       '$jobsCompleted jobs done',
+                  //       style: TextStyle(
+                  //         color: Colors.white.withOpacity(0.8),
+                  //         fontSize: 14,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
